@@ -1,0 +1,752 @@
+import uuid #para gerar ids aleatorios
+import sqlite3 #para banco de dados
+import datetime #pegar a data da lista em tempo real
+
+#herança na lista de financeiro 
+
+######################## Parte do Banco de Dados ######################################
+def bancoDados():
+    
+    conexao = sqlite3.connect("banco.db")
+    conexao.execute("PRAGMA foreign_keys = ON")
+    cursor = conexao.cursor()
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS usuarios(
+                    idUsuario TEXT NOT NULL PRIMARY KEY,
+                    nome TEXT NOT NULL,
+                    email TEXT NOT NULL UNIQUE,
+                    senha TEXT NOT NULL
+                    )""")
+    conexao.commit()
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS listas(
+                    idLista TEXT NOT NULL PRIMARY KEY,
+                    nomeLista TEXT NOT NULL,
+                    tetoOrcamentario REAL,
+                    observacoes TEXT,
+                    dataLista TEXT NOT NULL,
+                    idDono TEXT NOT NULL
+                      
+                    )""")
+    conexao.commit()
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS itens(
+                    idItem TEXT NOT NULL PRIMARY KEY,
+                    nomeItem TEXT NOT NULL,
+                    quantidade REAL NOT NULL,
+                    unidade TEXT,
+                    precoUnitario REAL NOT NULL,
+                    desconto TEXT,
+                    statusCompra REAL NOT NULL,
+                    idDonoItem TEXT NOT NULL,
+                    precoOriginal REAL, 
+                    observacoesItem TEXT,
+                    idCategoria TEXT
+                    )""")
+    conexao.commit()
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS categorias(
+                  nomeCategoria TEXT NOT NULL PRIMARY KEY,
+                  idCategoria TEXT NOT NULL
+                    )""")
+    conexao.commit()
+
+    conexao.close()
+    
+#salvar novo usuario no banco de dados
+def usuarioNovoBD(usuario): 
+
+    conexao = sqlite3.connect("banco.db")
+    conexao.execute("PRAGMA foreign_keys = ON")
+    cursor = conexao.cursor()
+
+    cursor.execute("INSERT INTO usuarios VALUES (?,?,?,?)",
+                   (usuario.idUsuario, usuario.nome,
+                   usuario.email, usuario.senha))
+    conexao.commit()
+
+#salvar lista no banco de dados
+def ListaNovaBD(listas): 
+
+    conexao = sqlite3.connect("banco.db")
+    conexao.execute("PRAGMA foreign_keys = ON")
+    cursor = conexao.cursor()
+
+    cursor.execute("INSERT INTO listas VALUES (?,?,?,?,?,?)",
+                   (listas.idLista, listas.nomeLista, 
+                    listas.tetoOrcamentario, listas.observacoes, listas.dataLista, listas.idDono))
+    conexao.commit()
+
+#salvar item no banco de dados 
+def ItemNovaBD(itens): 
+
+    conexao = sqlite3.connect("banco.db")
+    conexao.execute("PRAGMA foreign_keys = ON")
+    cursor = conexao.cursor()
+
+    cursor.execute("INSERT INTO itens VALUES (?,?,?,?,?,?,?,?,?,?)",
+                   (itens.idItem, itens.nomeItem, itens.quantidade, itens.unidade, itens.precoUnitario,
+                    itens.desconto, itens.statusCompra, itens.idDonoItem, itens.precoOriginal, itens.observacoesItem, itens.categorias))
+    conexao.commit()
+
+class Usuario():
+    def __init__(self, nome, email, senha, idUsuario = None,
+    listaComparilhados = None, dispositivosAtivos = None):
+    
+        self.listaComparilhados = []
+        self.dispositivosAtivos = []
+        self.nome = nome
+        self.email = email
+        self.senha = senha
+        self.idUsuario = idUsuario
+        #self.tetoOrcamentario = tetoOrcamentario
+    
+    @staticmethod
+    def login():
+        
+        email = input('Email: ') 
+        senha = input('Senha: ')
+        
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?",(email,senha))
+        resultado = cursor.fetchone()
+        conexao.close()
+
+        if resultado:
+            print("Login realizado com sucesso!")
+            #Criando um crachá
+            usuarioComCracha = Usuario(resultado[1],resultado[2],resultado[3],idUsuario=resultado[0])
+            
+            return usuarioComCracha
+            
+        else:
+            print("Não há conta com esse email")
+        
+        
+        
+    def sincronizarDados(self):
+        pass
+     
+    def definirLimiteGasto(self):
+        pass
+        
+    def compartilharLista(self):
+        pass
+
+def cadastro():
+
+        nome = input('Nome: ')
+        email = input('Email: ') 
+        senha = input('Senha: ')
+        
+        conexao = sqlite3.connect("banco.db")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT email FROM usuarios WHERE email = ?", (email,))
+        resultado = cursor.fetchone()
+        conexao.close()
+
+        if email != "" and senha != "":
+                
+            if resultado:
+                print("Ja existe uma conta para esse email")
+
+            else:    
+                    if(len( senha) == 6):
+                        print()
+                        print("*" * 15)
+                        print("Casdastrado com sucesso!")
+                        print("*" * 15)
+                        
+                        
+                        idUsuario = str(uuid.uuid4())
+                        novoUsuario = Usuario(nome,email,senha,idUsuario)
+                        usuarioNovoBD(novoUsuario)
+                        
+                    elif(len(senha) > 6 or len(senha) < 6):
+                        print("Por favor, digite uma senha com 6 dígitos.")      
+        else:
+            print("Digite seu email e sua senha de 6 dígitos")
+
+
+class Lista():
+    def __init__(self, nomeLista,tetoOrcamentario,observacoes, idDono, idLista=None, dataLista=None):
+    
+        self.idDono = idDono
+        self.nomeLista = nomeLista
+        self.observacoes = observacoes
+        self.valorTotalGeral = 0
+        self.valorTotalMarcado = 0
+        self.valorTotalPendentes = 0
+        self.tetoOrcamentario = tetoOrcamentario if tetoOrcamentario else 0
+        self.idLista = idLista if idLista else str(uuid.uuid4())
+        self.dataLista = dataLista if dataLista else datetime.datetime.now().strftime("%d/%m/%Y")
+
+    def adicionarItem(self,idItem,nomeItem, quantidade, unidade, precoUnitario, desconto,observacoesItem,categorias):
+
+        item = Item(nomeItem, quantidade, unidade, precoUnitario, desconto,observacoesItem,categorias,self.idLista,idItem)
+        ItemNovaBD(item)
+    
+    #Funciona mas por enquanto ainda não atualizei 
+    def itensDaLista(self):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT * FROM itens WHERE idDonoItem = ?", (self.idLista,))
+        linhas = cursor.fetchall()
+        conexao.close()
+
+        listaFormatada = []
+
+        for linha in linhas:
+    
+            dicionario = {
+                "nomeItem": linha[1],
+                "quantidade": linha[2],
+                "unidade": linha[3],
+                "precoUnitario": linha[4]
+            }
+            listaFormatada.append(dicionario)
+
+        if linhas:
+            return listaFormatada
+        else:
+            return None
+
+    def alterarStatus(self, idItem):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("""UPDATE itens SET statusCompra = CASE WHEN statusCompra = 1 THEN 0 ELSE 1 AND
+                         WHERE idItem = ? AND idDonoItem = ? """, 
+                         (idItem,self.idLista))
+        conexao.commit()
+        conexao.close()
+    #incompleta
+    def leituraBd(self):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT * FROM listas")
+        ###conexao.commit()
+
+        for listas in cursor.fetchall():
+            print(listas)
+        conexao.close()
+    
+    def removerLista(self):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("DELETE FROM itens WHERE idDonoItem = ?", (self.idLista,))
+
+        cursor.execute("DELETE FROM listas WHERE idDono = ? AND idLista = ?", (self.idDono,self.idLista))
+
+        conexao.commit()
+        conexao.close()
+
+    def adicionarEditor(self):
+        pass
+    
+    def atualizacaoLista(self,campo,valorNovo):
+        
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        
+        if campo == "nome":
+            nome = "UPDATE listas SET nomeLista = ? WHERE idLista = ?" 
+            cursor.execute(nome,(valorNovo,self.idLista))
+            conexao.commit()
+
+        elif campo == "nota":
+            nota = "UPDATE listas SET observacoes = ? WHERE idLista = ?" 
+            cursor.execute(nota,(valorNovo,self.idLista))
+            conexao.commit()
+
+        elif campo == "teto":
+            teto = "UPDATE listas SET tetoOrcamentario = ? WHERE idLista = ?" 
+            cursor.execute(teto,(valorNovo,self.idLista))
+            conexao.commit()
+        else:
+            conexao.close()
+            return
+
+        conexao.close()
+
+class listaFinanceira(Lista):
+
+    @staticmethod
+    def recontruirLista(nomeLista,idUsuario):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT * FROM listas WHERE nomeLista = ? AND idDono = ?", (nomeLista, idUsuario))
+        l = cursor.fetchone()
+        conexao.close()
+        
+        if l:
+            #reconstruir a lista
+            return listaFinanceira(l[1],l[2],l[3],l[5], idLista=l[0], dataLista=l[4])
+
+        else:
+            print("Não foi encontrada uma lista com esse nome\n")
+            return None
+ 
+    def calcularTotalGeral(self):
+
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT SUM(quantidade * precoUnitario) FROM itens WHERE idDonoItem = ?", (self.idLista,))
+        totalGeral = cursor.fetchone()
+        conexao.close()
+
+        if totalGeral and totalGeral[0] is not None:
+            self.valorTotalGeral = totalGeral[0]
+        else:
+            self.valorTotalGeral = 0
+
+    def calcularTotalMarcados(self):
+
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT SUM(quantidade * precoUnitario) FROM itens WHERE idDonoItem = ? AND statusCompra = ?", (self.idLista,1))
+        marcados = cursor.fetchone()
+        conexao.close()
+
+        if marcados and marcados[0] is not None:
+            self.valorTotalMarcado = marcados[0]
+        else:
+            self.valorTotalMarcado = 0
+
+    def calcularTotalPendentes(self):
+        
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT SUM(quantidade * precoUnitario) FROM itens WHERE idDonoItem = ? AND statusCompra = ?", (self.idLista,0))
+        naoMarcados = cursor.fetchone()
+        conexao.close()
+
+        if naoMarcados and naoMarcados[0] is not None:
+            self.valorTotalPendentes = naoMarcados[0]
+        else:
+            self.valorTotalPendentes = 0
+
+    def calcularTetoOrcamentario(self):
+        if self.valorTotalMarcado > self.tetoOrcamentario:
+            diferenca = self.tetoOrcamentario - self.valorTotalMarcado
+            print(f"ALERTA: O valor ultrapassou o limite em R$ {diferenca:.2f}!")
+        elif self.valorTotalMarcado == self.tetoOrcamentario:
+            print(f"ATENÇÃO: Você atingiu exatamente o limite de R$ {self.tetoOrcamentario :.2f}!")
+        else:
+            diferenca = self.valorTotalMarcado - self.tetoOrcamentario
+            print(f"Dentro do orçamento. Você ainda pode gastar R$ {diferenca:.2f}!")
+
+
+class Item():
+    def __init__(self,nomeItem, quantidade, unidade, precoUnitario, desconto,observacoesItem,categorias,idDonoItem,idItem=None):
+
+        self.nomeItem = nomeItem
+        self.quantidade = quantidade
+        self.unidade = unidade
+        self.precoUnitario = precoUnitario
+        self.desconto = desconto
+        self.observacoesItem = observacoesItem
+        self.statusCompra = 0
+        self.idItem = idItem if idItem else str(uuid.uuid4())
+        self.idDonoItem = idDonoItem
+        self.idCategoria = categorias
+
+    def aplicarDesconto(self):
+        print("Digite o tipo de desconto")
+        print("1 - Porcentagem Fixa\n2 - Promoção Progressiva (Leve X pague Y)")
+        
+        aux = 0
+
+        opcao = input("Opção: ")
+        if opcao == "1":
+
+            aux = 1
+
+            print("Qual a porcentagem de desconto?")
+            porcentagem = float(input("Porcentagem: "))
+
+            self.desconto = self.precoUnitario * (porcentagem/100)
+        elif opcao == "2":
+            
+            aux = 2
+
+            print("Leve X por Y")
+            x = int(input("X: "))
+            y = float(input("Y: "))
+
+            semDesconto = self.precoUnitario * x
+            self.desconto = (semDesconto - y) / x
+
+        copiaPrecoUnitario = self.precoUnitario
+        self.precoUnitario -= self.desconto
+
+        if aux == 1:
+            aux = 0
+        elif aux == 2:
+            aux = 1
+
+        ##Atualizando no BD
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("""UPDATE itens SET precoUnitario = ?, desconto = ?, precoOriginal = ?
+                         WHERE idItem = ? AND idDonoItem = ? """, 
+                         (self.precoUnitario,aux,copiaPrecoUnitario,self.idItem,self.idDonoItem))
+        conexao.commit()
+        conexao.close()
+
+    def atualizarItem(self,campo,valorNovo):
+        
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        
+        if campo == "nome":
+            nome = "UPDATE itens SET nomeItem = ? WHERE idDonoItem = ? AND idItem = ?" 
+            cursor.execute(nome,(valorNovo,self.idDonoItem,self.idItem))
+            conexao.commit()
+
+        elif campo == "nota":
+            nota = "UPDATE itens SET observacoesItem = ? WHERE idDonoItem = ? AND idItem = ?" 
+            cursor.execute(nota,(valorNovo,self.idDonoItem,self.idItem))
+            conexao.commit()
+
+        elif campo == "precoUnitario":
+            precoUnitario = "UPDATE itens SET precoUnitario = ? WHERE idDonoItem = ? AND idItem = ?" 
+            cursor.execute(precoUnitario,(valorNovo,self.idDonoItem,self.idItem))
+            conexao.commit()
+        
+        elif campo == "unidade":
+            unidade = "UPDATE itens SET unidade = ? WHERE idDonoItem = ? AND idItem = ?" 
+            cursor.execute(unidade,(valorNovo,self.idDonoItem,self.idItem))
+            conexao.commit()
+
+        else:
+            conexao.close()
+            return
+
+        conexao.close()
+
+    def removerItem(self):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("DELETE FROM itens WHERE idDonoItem = ? AND idItem = ?", (self.idDonoItem,self.idItem))
+
+        conexao.commit()
+        conexao.close()
+ 
+    ##Essa parte de quantidade precisa ter atenção quando desconto X por Y
+    def quantidadeItem(self, opecacao):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT desconto, precoOriginal, quantidade FROM itens WHERE idDonoItem = ? AND idItem = ?",(self.idDonoItem,self.idItem))
+        item = cursor.fetchone()
+        conexao.close()
+
+        if item:
+            desconto = item[0]
+            precoOriginal = item[1]
+            quantidade = item[2]
+
+        if opecacao == "+":
+            if desconto == 1:
+                ## É com desconto
+                idCopia = str(uuid.uuid4())
+                copiaItem = Item(self.nomeItem,1,self.unidade,precoOriginal,0,self.observacoesItem,0,
+                                 self.idDonoItem,idCopia)
+                ItemNovaBD(copiaItem)
+
+            else:
+                ## Sem desconto X por Y
+                conexao = sqlite3.connect("banco.db")
+                cursor = conexao.cursor()
+
+                quantidadeNova = quantidade + 1
+                cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
+                                (quantidadeNova,self.idDonoItem, self.idItem))
+                conexao.commit()
+                conexao.close()
+
+        elif opecacao == "-":
+            if desconto == 1:
+                print("Deseja remover este Item com desconto?")
+                opcao = str(input("sim ou nao? "))
+                if opcao == "sim":
+                    self.removerItem()
+                else:
+                    pass
+
+            else:
+                if quantidade == 1:
+                    print("Deseja remover o Item?")
+                    opcao = str(input("sim ou nao? "))
+                    if opcao == "sim":
+                        self.removerItem()
+                    else:
+                        pass
+
+                elif quantidade > 1:
+
+                    conexao = sqlite3.connect("banco.db")
+                    cursor = conexao.cursor()
+
+                    quantidadeNova = quantidade - 1
+                    cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
+                                    (quantidadeNova,self.idDonoItem, self.idItem))
+                    conexao.commit()
+                    conexao.close()
+
+class gerenciamentoCategoria():
+
+    @staticmethod
+    def sugestaoNomeLista(nomeLista):
+
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT idCategoria FROM categorias WHERE nomeCategoria = ?",(nomeLista,))
+        resultado = cursor.fetchone()
+        
+
+        if resultado:
+            ##Tem categoria com esse nome
+            cursor.execute("SELECT nomeItemCategoria FROM dicionario WHERE idCategoria = ?",(resultado[0],))
+            itens = cursor.fetchall()
+            conexao.close()
+            return itens
+        else:
+            return None
+
+
+    @staticmethod
+    def categoriaItem(nomeItem):    
+
+            conexao = sqlite3.connect("banco.db")
+            conexao.execute("PRAGMA foreign_keys = ON")
+            cursor = conexao.cursor()
+
+            cursor.execute("SELECT idCategoria FROM dicionario WHERE nomeItemCategoria = ?", (nomeItem,))
+            resultado = cursor.fetchone()
+            conexao.close()
+
+            if resultado:
+                ##existe no dicionario
+                return resultado[0]
+            else:
+                ##não existe essa categoria 
+                return 'O'
+            
+    @staticmethod
+    def categoria():
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        #lista de tuplas
+        categorias = [
+            ('Mercearia','M',), ('Açougue e Peixaria','A',),
+            ('Higiene e Perfumaria','HIG',),
+            ('Padaria','P',),('Bebidas','B',),('Outros','O',)
+        ]
+
+        cursor.executemany("INSERT OR IGNORE INTO categorias (nomeCategoria,idCategoria) VALUES (?,?)",categorias)
+
+        conexao.commit()
+        conexao.close()
+
+    @staticmethod
+    def registrarCategoria():
+        print("Qual o nome da nova categoria?")
+        novaCategoria = str(input("Nome da categoria: "))
+
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        idCategoria = str(uuid.uuid4())
+        cursor.execute("INSERT OR IGNORE INTO categorias (nomeCategoria,idCategoria) VALUES (?,?)",(novaCategoria,idCategoria))
+
+        conexao.commit()
+        conexao.close() 
+
+    @staticmethod
+    def dicionario():
+
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("""CREATE TABLE IF NOT EXISTS dicionario(
+                    nomeItemCategoria TEXT NOT NULL PRIMARY KEY,
+                    idCategoria TEXT,
+                    FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria)
+                        )""")
+        conexao.commit()
+
+        itens = [
+            ('Feijão', 'M'),('Arroz', 'M'),('Açucar','M'),
+            ('Peixe', 'A'),('Carne','A'),('Frango','A'),
+            ('Shampoo','HIG'),('Sabonete','HIG'),('Condicionador','HIG'),
+            ('Pão','P'),('Manteiga','P'),('Bolo','P'),
+            ('Guaraná','B'),('Cerveja','B'),('Leite','B')
+        ]
+
+        cursor.executemany("INSERT OR IGNORE INTO dicionario VALUES (?,?)",itens)
+
+        conexao.commit()
+        conexao.close() 
+
+class sincronizador():
+    def __init__(self):
+    
+        self.bufferPendencias = 0
+        self.statusConexao = 0
+    
+    def armazenrLocalmente(self):
+        pass
+    
+    def sincronizarAoReconectar(self):
+        pass
+          
+class compartilhamento():
+    def __init__(self,ListaRec):
+    
+        self.lista = listaRec
+        self.conteudoFormatado = ""
+    
+    
+    def formatarParaTexto(self):
+
+        titulo = f" *Lista: {self.lista.nomeLista}*\n"
+        data = f" *Data: {self.lista.dataLista}*\n"
+        texto = titulo + data
+        itensLista = listaRec.itensDaLista()
+
+
+        itensLista = self.lista.itensDaLista()
+
+        if itensLista:
+            for item in itensLista:
+
+                linha = f"- {item['nomeItem']} ({item['quantidade']} {item['unidade']} {item['precoUnitario']:.2f})\n"
+                texto += linha
+
+        else:
+            texto += "Lista Vazia.\n"
+
+        self.lista.calcularTotalGeral()
+        self.lista.calcularTotalMarcados()
+
+        tetoOrcamentario = f"\n\nTeto Orçamentario: R${float(self.lista.tetoOrcamentario):.2f}\n"
+        totalGeral = f"Total: R${self.lista.valorTotalGeral:.2f}\n"
+        totalMarcado = f"Total Marcados: R${self.lista.valorTotalMarcado:.2f}\n"
+
+        texto += tetoOrcamentario + totalMarcado + totalGeral 
+    
+        return texto
+        
+    def enviarWhatsApp(self):
+        pass
+        
+    def copiarParaTransferencia(self):
+        pass 
+
+if __name__ == "__main__":
+        
+        bancoDados()
+        print("---- Bem-vindo ao ListaSmart! ----")
+        print()
+    
+    ## Lista.leituraBd()
+        print("Digite 1 se quiser criar uma conta no ListaSmart Ou digite 2 para fazer login")
+        opcao = input('Opção: ')
+
+        if opcao == "1":
+            cadastro()
+            print("Agora faça login:\n")
+            usuario = Usuario.login()     
+        elif opcao == "2":
+            usuario = Usuario.login()
+        else:
+            print("Opção inválida!")
+            exit()
+            
+        print("*********** Digite o número da ação ***********\nMENU:\n")
+        print("1 -> Criar nova lista\n2 -> Abrir uma lista\n")
+        opcao = input("Opção: ")
+
+        if opcao == "1":
+            listas = Lista("perfumaria", "320","Avon",usuario.idUsuario)
+            ListaNovaBD(listas)
+        
+        elif opcao == "2":
+            print("Qual o nome da lista que você quer Abrir?\n")
+            nomeLista = input("Nome da lista: ")
+
+            #entrei na lista 
+            listaRec = Lista.recontruirLista(nomeLista,usuario.idUsuario)
+
+
+            if listaRec:
+
+                #mostrar os itens na tela
+                listaRec.itensDaLista()
+
+                print("*********** Digite o número da ação ***********\nMENU:\n")
+                print("1 -> Adicionar um novo item na lista\n2 -> Alterar status\n3 -> Compartilhar lista\n")
+                opcao = input("Opção: " )
+
+                #para adicionar um novo item
+                if opcao == "1":
+                    listaRec.adicionarItem("sabonete", "2", "un", "4,00", "sem desconto")
+
+                #para alterar status 
+                elif opcao == "2":
+        
+                    print("Digite o nome do item que quer marcar ou desmarcar\n")
+                    nomeitem = input("Nome do item: ")
+
+                    conexao = sqlite3.connect("banco.db")
+                    cursor = conexao.cursor()
+
+                    cursor.execute("SELECT idItem FROM itens WHERE nomeItem = ? AND idDonoItem = ?", (nomeitem, listaRec.idLista))
+                    resultado = cursor.fetchone()
+                    conexao.close()
+                    if resultado:
+                        #mudando o status
+                        listaRec.alterarStatus(resultado[0])
+
+                elif opcao == "3":
+                    pass
+
+        else:
+            print("Opção Inválida!")
+
