@@ -4,18 +4,19 @@ import datetime #pegar a data da lista em tempo real
 from abc import ABC, abstractmethod
 import smtplib
 from email.message import EmailMessage #para email
+import pyfiglet
 import webbrowser #abre qualquer link no navegador
 import urllib.parse #transforma texto em formato de URL
 from rich.console import Console #Tabelas
 from rich.table import Table
 import os
 from dotenv import load_dotenv #proteção email
-
-
-
-
 console = Console()
 
+
+print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
+
+      
 
 ######################## Parte do Banco de Dados ######################################
 def bancoDados():
@@ -93,7 +94,7 @@ def ListaNovaBD(listas):
 def ItemNovaBD(itens): 
 
     conexao = sqlite3.connect("banco.db")
-    conexao.execute("PRAGMA foreign_keys = ON")
+    conexao.execute("PRAGMA foreign_keys = ON")  
     cursor = conexao.cursor()
 
     cursor.execute("INSERT INTO itens VALUES (?,?,?,?,?,?,?,?,?,?)",
@@ -101,6 +102,7 @@ def ItemNovaBD(itens):
                     itens.desconto, itens.statusCompra, itens.idDonoItem, itens.observacoesItem, itens.categorias))
     conexao.commit()
     conexao.close()
+
 
 class Usuario():
     def __init__(self, nome, email, senha, idUsuario = None):
@@ -153,17 +155,52 @@ def cadastro(nome,email,senha):
                 return True
             
         return None
-                        
+
+def contarItens(idLista):
+    conexao = sqlite3.connect("banco.db")
+    cursor = conexao.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM itens WHERE idDonoItem = ?", (idLista,))
+    qtd = cursor.fetchone()[0]
+
+    conexao.close()
+    if qtd:
+        return qtd
+    else:
+        qtd = 0
+        return qtd
+
 def buscarLista(idDono):
     conexao = sqlite3.connect("banco.db")
     conexao.execute("PRAGMA foreign_keys = ON")
     cursor = conexao.cursor()
 
-    cursor.execute("SELECT idLista, nomeLista FROM listas WHERE idDono = ?", (idDono,))
+    cursor.execute("SELECT idLista, nomeLista, dataLista FROM listas WHERE idDono = ?", (idDono,))
     listasDoDono = cursor.fetchall()
     conexao.close()
 
-    return listasDoDono
+    listas = []
+    for linha in listasDoDono:
+        listas.append({
+
+            "id": linha[0],
+            "nome": linha[1],
+            "data": linha[2]
+        })
+
+    return listas
+
+def tipoDesconto(precoUnitario,opcao2,x,y,porcentagem):
+
+    if opcao2 == 1:
+
+            variavelDesconto = precoUnitario * (porcentagem/100)
+
+            return variavelDesconto
+
+    elif opcao2 == 2:
+
+            return -(x * 1000 + y)
 
 class Lista():
     def __init__(self, nomeLista,tetoOrcamentario,observacoes, idDono, idLista=None, dataLista=None):
@@ -177,17 +214,18 @@ class Lista():
 
         self.__valorTotalMarcado = 0
 
-    def adicionarItem(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,opcao1,opcao2,x,y,porcentagem):
+    @staticmethod
+    def adicionarItem(idLista,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,opcao1,opcao2,x,y,porcentagem):
 
         desconto = 0
         if opcao1 == 's':
 
             desconto = tipoDesconto(precoUnitario,opcao2,x,y,porcentagem)
 
-            item = ItemPromocional(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,self.idLista,desconto)
+            item = ItemPromocional(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idLista,desconto,0)
 
         elif opcao1 == 'n':
-            item = ItemComum(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,self.idLista,desconto)
+            item = ItemComum(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idLista,desconto,0)
 
         ItemNovaBD(item)
     
@@ -205,10 +243,10 @@ class Lista():
         for linhas in linha:
 
             if linhas[5] == 0 or linhas[5] is None:
-                item = ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5], linhas[0])
+                item = ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
 
             else:
-                 item = ItemPromocional(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5], linhas[0])
+                 item = ItemPromocional(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
     
             listaObetos.append(item)
 
@@ -270,8 +308,9 @@ class Lista():
             return
         
         conexao.close()
-
-    def recontruirLista(self,idLista):
+    
+    @staticmethod
+    def recontruirLista(idLista):
         conexao = sqlite3.connect("banco.db")
         conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
@@ -281,17 +320,18 @@ class Lista():
         conexao.close()
         
         if linha:
-
-            self.idLista = linha[0]
-            self.nomeLista = linha[1]
-            self.tetoOrcamentario = linha[2]
-            self.observacoes = linha[3]
-            self.dataLista = linha[4]
-            self.idDono = linha[5]
-            return True
+            lista = Lista(
+            nomeLista=linha[1],
+            tetoOrcamentario=linha[2],
+            observacoes=linha[3],
+            idDono=linha[5],
+            idLista=linha[0],
+            dataLista=linha[4]
+            )
+            return lista
 
         else:
-            return False
+            return None
  
     def calcularTotalGeral(self):
 
@@ -355,17 +395,25 @@ class Lista():
             return valorTotalPendentes or 0
 
     def calcularTetoOrcamentario(self):
-        if self.__valorTotalMarcado > self.tetoOrcamentario:
+        if self.__valorTotalMarcado > float(self.tetoOrcamentario):
             diferenca = abs(self.tetoOrcamentario - self.__valorTotalMarcado)
-            return f"[red]ALERTA: O valor ultrapassou o limite em R$ {diferenca:.2f}![/red]"
-        elif self.__valorTotalMarcado == self.tetoOrcamentario:
-            return f"[yellow]ATENÇÃO: Você atingiu exatamente o limite de R$ {self.tetoOrcamentario :.2f}![/yellow]"
+            return {"status" : "vermelho",
+                    "mensagem" : f"Você ultrapassou o limite em R$ {diferenca:.2f}"
+            }
+        elif self.__valorTotalMarcado == float(self.tetoOrcamentario):
+            return {
+                "status" : "amarelo",
+                "mensagem" : f"Você atingiu exatamente o limite de R$ {self.tetoOrcamentario :.2f}"
+            }
         else:
-            diferenca = abs(self.tetoOrcamentario - self.__valorTotalMarcado)
-            return f"[green]Dentro do orçamento. Você ainda pode gastar R$ {diferenca:.2f}![/green]"
+            diferenca = abs(float(self.tetoOrcamentario) - self.__valorTotalMarcado)
+            return {
+                "status" : "verde",
+                "mensagem" : f"Dentro do orçamento. Você ainda pode gastar R$ {diferenca:.2f}"
+            }
 
 class Item(ABC):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,idItem=None):
+    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
 
         self.nomeItem = nomeItem
         self.quantidade = quantidade
@@ -373,22 +421,39 @@ class Item(ABC):
         self.precoUnitario = precoUnitario
         self.desconto = desconto
         self.observacoesItem = observacoesItem
-        self.statusCompra = 0
+        self.statusCompra = statusCompra
         self.idItem = idItem if idItem else str(uuid.uuid4())
         self.idDonoItem = idDonoItem
         self.categorias = categorias
 
-    @staticmethod
-    def paraTuplas(linhas):
-        if linhas[5] == 0 or linhas[5] is None:
-                return ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5], linhas[0])
-
-        else:
-                return ItemPromocional(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5], linhas[0])
 
     @abstractmethod
     def calcularPreco():
         pass
+
+    @staticmethod
+    def paraTuplas(linhas):
+        if linhas[5] == 0 or linhas[5] is None:
+                return ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
+
+        else:
+                return ItemPromocional(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
+
+    @staticmethod
+    def reconstruirItem(idItem):
+        conexao = sqlite3.connect("banco.db")
+        conexao.execute("PRAGMA foreign_keys = ON")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT * FROM itens WHERE idItem = ?", (idItem,))
+        linha = cursor.fetchone()
+        conexao.close()
+
+        if not linha:
+            return None
+
+        itemRec = Item.paraTuplas(linha)
+        return itemRec
 
     def atualizarItem(self,campo,valorNovo):
         
@@ -480,27 +545,15 @@ class Item(ABC):
                     conexao.close()
 
 class ItemComum(Item):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,idItem=None):
-        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,idItem=idItem)
+    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
+        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=idItem)
 
     def calcularPreco(self):
         return self.quantidade * self.precoUnitario
 
-def tipoDesconto(precoUnitario,opcao2,x,y,porcentagem):
-
-    if opcao2 == '1':
-
-            variavelDesconto = precoUnitario * (porcentagem/100)
-
-            return variavelDesconto
-
-    elif opcao2 == '2':
-
-            return -(x * 1000 + y)
-
 class ItemPromocional(Item):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,idItem=None):
-        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,idItem=idItem)
+    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
+        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=idItem)
 
 
         self.desconto = desconto
@@ -619,7 +672,7 @@ class GerenciamentoCategoria():
         conexao.commit()
         conexao.close() 
           
-class compartilhamento():
+class compartilhamento(): 
     def __init__(self,listaRec):
     
         self.__lista = listaRec
@@ -656,11 +709,8 @@ class compartilhamento():
     
         return texto
         
-    def enviarEmail(self,email_destino):
 
-        if not self.__email_remetente or not self.__senha:
-            print("Erro: email ou senha não encontrados no arquivo .env")
-            return False
+    def enviarEmail(self,email_destino):
 
         msg = EmailMessage()
         msg['Subject'] = "Lista de Compras"
@@ -696,63 +746,7 @@ class compartilhamento():
 
         return mensagem
 
-def verificaEscolha(max):
-
- while True: 
-    print("\nFaça sua escolha ou digite 0 para sair.\n")
  
-    try:
-        entrada = int(input("Escolha: "))
-    
-        escolha = entrada - 1 
-         
-        if escolha == -1: 
-            return -1
-        
-        if 0 <= escolha < max:
-            return escolha
-        
-        
-    except ValueError: print("\nDigite um número válido!\n")
-
-def tabelaListas(listas):
-
-        print("\n")
-        max = 0
-        tabela = Table(title="SUAS LISTAS")
-
-        tabela.add_column("Nº", justify="center")
-        tabela.add_column("Nome da Lista", justify="center")
-
-        if listas:
-                for i, lista in enumerate(listas):
-                    max +=1
-                    tabela.add_row(str(i+1),lista[1])
-            
-        else:
-                tabela.add_row("-","Você ainda não tem listas.")
-            
-        console.print(tabela)
-
-        return max
-
-def tabelaItens(itens):
-        max = 0
-        tabela = Table(title="--------- Itens da Lista ---------")
-
-        tabela.add_column("Nº", justify="center")
-        tabela.add_column("Item", justify="center")
-        tabela.add_column("Qtd", justify="center")
-        tabela.add_column("Unidade", justify="center")
-        tabela.add_column("Preço", justify="center")
-                            
-        for i, item in enumerate(itens):
-                max +=1
-                tabela.add_row(str(i+1),item.nomeItem, f"{item.quantidade}",f"{item.unidade}",f"R$ {item.precoUnitario:.2f}")
-        console.print(tabela,justify = "center")
-        print("\n")
-
-        return max
 
 if __name__ == "__main__":
         
@@ -761,442 +755,4 @@ if __name__ == "__main__":
     gerente.categoria() 
     gerente.dicionario() 
 
-    usuarioComCracha = None
-
-    while True:
-        if usuarioComCracha == None:
-
-            titulo = "LISTA SMART"
-            console.print("\n" + "-"*40)
-            console.print(titulo.center(40))
-            console.print("-"*40)
-            print("1. Login")
-            print("2. Cadastrar")
-            print("0. Sair")
-            opcao = input("Escolha: ")
-
-            if opcao == '1':
-
-                email = input('Email: ') 
-                senha = input('Senha: ')
-                # Chame sua função de login aqui
-                usuarioComCracha = Usuario.login(email,senha)
-                if usuarioComCracha == None:
-                    print("Falha ao fazer login ou usuario não encontrado.\n")
-            elif opcao == '2':
-
-                nome = input('Nome: ')
-                email = input('Email: ') 
-
-                while True: 
-                    print("\nSenha de 6 dígitos.\n")
-                    senha = input('Senha: ')
-
-                    if(len(senha) == 6):
-                        break
-                    elif(len(senha) > 6 or len(senha) < 6):
-                        continue
-
-                verificacao = cadastro(nome,email,senha)
-
-                if verificacao:
-                    print("\nCadastrado com sucesso!\n")
-                else:
-                    print("\nJá existe uma conta para esse email.\n")
-
-            elif opcao == '0':
-                break
-        
-        if usuarioComCracha != None:
-            #AMBIENTE LOGADO
-            
-            print(f">>> Logado como: {usuarioComCracha.nome}")
-
-            listas = buscarLista(usuarioComCracha.idUsuario)
-
-            if listas:
-                tabelaListas(listas)
-            else:
-                print("\nVocê ainda não tem listas.\n")
-
-            listaAtiva = None
-            print("\n")
-
-            titulo = "OPÇÕES"
-            console.print("\n" + "-"*40)
-            console.print(titulo.center(40))
-            console.print("-"*40)
-
-            print("1. Criar Nova Lista")
-            print("2. Entrar em uma lista")
-            print("3. Logout")
-            print("0. Sair do Programa")
-            
-            opcao = input("O que deseja fazer? ")
-            if opcao not in ['1','2','3','0']:
-                print("\nOpção inválida!\n")
-                continue
-
-            if opcao == '1':
-                # MOSTRAR SUGESTÕES ANTES DE PEDIR O NOME
-                sugestoes = gerente.sugestaoNomeLista()
-                        
-                console.print("\n[bold]Sugestões de nomes para lista[/bold]\n", justify="center")
-
-                linha = "  ".join(f"[{sug}]" for sug in sugestoes)
-                console.print(linha, justify="center")
-                
-                nome= input("\nDigite o nome para sua nova lista: ")
-                teto = float(input("Teto orçamentário: "))
-                obs = str(input("Observação: "))
-
-                listaCriada = Lista(nome,teto,obs,usuarioComCracha.idUsuario)
-                if listaCriada:
-                    ListaNovaBD(listaCriada)
-
-                    listaAtiva = listaCriada
-
-                else:
-                    print("Erro ao criar lista")
-
-            elif opcao == '2':
-                listas = buscarLista(usuarioComCracha.idUsuario)
-
-                if not listas:
-                    print("\nNenhuma lista disponível.\n")
-                    continue
-                
-                max = tabelaListas(listas)
-
-                print("\n")
-                escolha = verificaEscolha(max)
-
-                if escolha == -1:
-                    continue
-
-                idLista = listas[escolha][0]
-
-                listaCriada = Lista("",0,"",usuarioComCracha.idUsuario)
-                
-                if listaCriada.recontruirLista(idLista):
-                    print(f"\nEntrando na lista: {listaCriada.nomeLista}\n")
-                    listaAtiva = listaCriada
-                else:
-                    print("Erro ao carregar lista.")
-                    continue
-
-            elif opcao == '3':
-                print("Sessão encerrada.")
-                usuarioComCracha = None
-
-            elif opcao == '0':
-
-                import sys
-                sys.exit()
-
-################### DENTRO DA LISTA #########################
-
-            if listaAtiva:
-                
-                #Dentro da lista 
-                while True:
-
-
-                    titulo = "OPÇÕES"
-                    console.print("\n" + "-"*40)
-                    console.print(titulo.center(40))
-                    console.print("-"*40)
-
-                    print("1. Adicionar Item")
-                    print("2. Ver Totais (Geral / Marcados / Pendentes)")
-                    print("3. Ver Itens da Lista")
-                    print("4. Marcar/Desmarcar Item")
-                    print("5. Alterar Quantidade do Item")
-                    print("6. Editar Item")
-                    print("7. Remover Item")
-                    print("8. Compartilhar por Email")
-                    print("9. Compartilhar por WhatsApp")
-                    print("10. Criar Nova Categoria")
-                    print("11. Editar Dados da Lista")
-                    print("12. Remover Lista")
-                    print("0. Voltar")
-
-                    opcao = input("O que deseja fazer? ")
-                    if opcao not in ['1','2','3','4','5','6','7','8','9','10','11','12','0']:
-                        print("\nOpção inválida!\n")
-                        continue
-
-                    if opcao == '1':
-                        # MOSTRAR SUGESTÕES DE ITENS ANTES DE PEDIR O NOME
-                        
-
-                        sugestoes = gerente.sugestaoNomeItem()
-                        
-                        console.print("\n[bold]Sugestões de itens[/bold]\n", justify="center")
-
-                        linha = "  ".join(f"[{sug}]" for sug in sugestoes)
-                        console.print(linha, justify="center")
-                            
-                        
-                        nome_i = input("\nNome do item: ")
-                        unidade = input("Unidade de medida: ")
-                        qtd = int(input("Quantidade: "))
-                        preco = float(input("Preço Unitário: "))
-                        obs = str(input("Observação: "))
-                        
-                        # MOSTRAR CATEGORIAS PARA VINCULAR O ITEM
-                        
-
-                        sugestoes = gerente.sugestaoNomeLista()
-                        
-                        console.print("\n[bold]Categorias disponíveis[/bold]\n", justify="center")
-
-                        linha = "  ".join(f"[{sug}]" for sug in sugestoes)
-                        console.print(linha, justify="center")
-                        print("\n")
-
-                        cat = str(input("Qual a categoria do item? "))
-                        
-                        print("\nEste item é promocional? (s/n)\n")
-                        opcao1 = input("s/n: ")
-
-                        if opcao1 == 's':
-                            print("Digite o tipo de desconto")
-                            print("1 - Porcentagem Fixa\n2 - Promoção Progressiva (Leve X pague Y)")
-                            opcao2 = input("Opção: ")
-
-                            if opcao2 == '1':
-                                print("\nQual a porcentagem de desconto?\n")
-                                porcentagem = float(input("Porcentagem: "))
-                                listaAtiva.adicionarItem(nome_i,qtd,unidade,preco,obs,cat,opcao1,opcao2,0,0,porcentagem)
-                                print("\nItem adcionado com sucesso!\n")
-
-                            elif opcao2 == '2':
-
-                                print("\nLeve X por Y\n")
-                                x = int(input("X: "))
-                                y = float(input("Y: "))
-                                listaAtiva.adicionarItem(nome_i,qtd,unidade,preco,obs,cat,opcao1,opcao2,x,y,0)
-                                print("\nItem adcionado com sucesso!\n")
-      
-                        elif opcao1 == 'n':
-                            listaAtiva.adicionarItem(nome_i,qtd,unidade,preco,obs,cat,opcao1,0,0,0,0)
-                            print("\nItem adcionado com sucesso!\n")
-
-                    elif opcao == '2':
-
-                        geral = listaAtiva.calcularTotalGeral()
-                        marcados = listaAtiva.calcularTotalMarcados()
-                        pendente = listaAtiva.calcularTotalPendentes()
-                        teto = listaAtiva.calcularTetoOrcamentario()
-
-                        geral = geral or 0
-                        marcados = marcados or 0
-                        pendente = pendente or 0
-
-                        print("\n")
-                        tabela = Table(title="Ordenação por Valor Total")
-                        tabela.add_column("TOTAL", justify="center")
-                        tabela.add_column("TOTAL MARCADOS", justify="center")
-                        tabela.add_column("TOTAL PENDENTE", justify="center")
-                        tabela.add_row(
-                            f"R$ {geral:.2f}",
-                            f"R$ {marcados:.2f}",
-                            f"R$ {pendente:.2f}"
-                        )
-                        console.print(tabela)
-                        console.print(teto)
-                        
-                        print("\n")
-                        
-                    elif opcao == '3':
-                        itens = listaAtiva.itensDaLista()
-
-                        print("\n")
-                        if not itens:
-                            print("Lista vazia.")
-                            continue
-                        else:
-
-                            tabelaItens(itens)
-
-                    elif opcao == '4':
-
-                        itens = listaAtiva.itensDaLista()
-
-                        if not itens:
-                            print("Lista vazia.")
-                            continue
-
-                        print("\n")
-                        max = 0
-                        tabela = Table(title="Itens da Lista")
-                        tabela.add_column("Nº", justify="center")
-                        tabela.add_column("Nome do Item", justify="center")
-
-                        for i, item in enumerate(itens):
-                            max += 1
-                            tabela.add_row(str(i+1), item.nomeItem)
-                        console.print(tabela)
-
-                        escolha = verificaEscolha(max)
-                        if escolha == -1:
-                            continue
-
-                        item = itens[escolha]
-
-                        listaAtiva.alterarStatus(item.idItem)
-
-                        print("Status alterado!")
-
-                    elif opcao == '5':
-                    
-                        itens = listaAtiva.itensDaLista()
-
-                        max = 0
-                        print("\n")
-                        tabela = Table(title="Itens da Lista")
-                        tabela.add_column("Nº", justify="center")
-                        tabela.add_column("Nome do Item", justify="center")
-                        tabela.add_column("Qtd", justify="center")
-
-                        for i, item in enumerate(itens):
-                            max += 1
-                            tabela.add_row(str(i+1), item.nomeItem, str(item.quantidade))
-                        console.print(tabela)
-
-
-                        escolha = verificaEscolha(max)
-                        if escolha == -1:
-                            continue
-                        print("\n")
-                        operacao = console.input("[bold]Digite[/] [green][bold]+[/][/] para aumentar ou [red][bold]-[/][/] para diminuir: ")
-                        print("\n")
-
-                        itens[escolha].quantidadeItem(operacao)
-
-                    elif opcao == '6':
-
-                            itens = listaAtiva.itensDaLista()
-
-                            max = 0
-                            print("\n")
-                            tabela = Table(title="Itens da Lista")
-                            tabela.add_column("Nº", justify="center")
-                            tabela.add_column("Nome do Item", justify="center")
-
-                            for i, item in enumerate(itens):
-                                max += 1
-                                tabela.add_row(str(i+1), item.nomeItem)
-                            console.print(tabela)
-
-
-                            escolha = verificaEscolha(max)
-
-                            if escolha == -1:
-                                continue
-
-                            item = itens[escolha]
-                            print("\n")
-                            
-                            tabela = Table(title="CAMPOS")
-                            tabela.add_column("Nome", justify="center")
-                            tabela.add_column("Nota", justify="center")
-                            tabela.add_column("Preço", justify="center")
-                            tabela.add_column("Unidade", justify="center")
-
-                            tabela.add_row("-", "-", "-", "-")
-                            console.print(tabela)
-
-                            print("\n")
-                            campo = input("Qual deseja editar? ")
-                            valor = input("Novo valor: ")
-
-                            item.atualizarItem(campo, valor)
-
-                    elif opcao == '7':
-
-                        itens = listaAtiva.itensDaLista()
-
-                        max = 0
-                        print("\n")
-                        tabela = Table(title="Itens da Lista")
-                        tabela.add_column("Nº", justify="center")
-                        tabela.add_column("Nome do Item", justify="center")
-
-                        for i, item in enumerate(itens):
-                            max += 1
-                            tabela.add_row(str(i+1), item.nomeItem)
-                        console.print(tabela)
-
-
-                        escolha = verificaEscolha(max)
-                        if escolha == -1:
-                            continue
-                        itens[escolha].removerItem()
-
-                        print("Item removido!")
-
-                    elif opcao == '8':
-                        email_destino = input("Digite o email de destino: ")
-                        verificacao = compartilhamento(listaAtiva).enviarEmail(email_destino)
-
-                        if verificacao:
-                            print("\nEmail enviado com sucesso!\n")
-                        else:
-                            print("\nErro ao enviar email\n")
-
-                    elif opcao == '9':
-                        numero = input("Digite o número de destino (ex: 55933333333)")
-
-                        mensagem = compartilhamento(listaAtiva).enviarZap(numero)
-
-                        if mensagem:
-                            
-                            print(type(mensagem))
-                            print(mensagem)
-                            print("\nWhatsApp aberto com a mensagem pronta para envio!\n")
-                        else:
-                            print("\nMensagem vazia!\n")
-                    
-                    elif opcao == '10':
-                        novaCategoria = input("Digite o nome da nova categoria: ")
-
-                        if novaCategoria.strip() == "":
-                            print("Categoria inválida!")
-                        else:
-                            gerente.registrarCategoria(novaCategoria)
-                            print("Categoria registrada com sucesso!")
-
-                    elif opcao == '11':
     
-                        print("\n")
-                            
-                        tabela = Table(title="CAMPOS")
-                        tabela.add_column("Nome", justify="center")
-                        tabela.add_column("Nota", justify="center")
-                        tabela.add_column("Teto", justify="center")
-
-                        tabela.add_row("-", "-", "-")
-                        
-                        console.print(tabela)
-
-                        print("\n")
-                        campo = input("Qual deseja editar? ")
-                        valor = input("Novo valor: ")
-
-                        listaAtiva.atualizacaoLista(campo, valor)
-
-                    elif opcao == '12':
-                        confirm = input("Tem certeza que deseja excluir a lista? (sim/nao): ")
-
-                        if confirm == "sim":
-                            listaAtiva.removerLista()
-                            print("Lista removida!")
-                            break
-
-                    elif opcao == '0':
-                        break
-
-            else:
-                ("Erro")
