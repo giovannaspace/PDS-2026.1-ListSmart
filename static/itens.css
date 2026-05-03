@@ -1,0 +1,319 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #1A1A1A;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* HEADER */
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+header h2 {
+    color: #FF1E82;
+    font-size: 20px;
+    flex-grow: 1;
+    text-align: center;
+}
+
+header img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #FF1E82;
+    padding: 2px;
+}
+
+/* BOTÃO VOLTAR HEADER */
+.menuIcon {
+    font-size: 22px;
+    color: #FF1E82;
+    cursor: pointer;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.menuIcon:hover {
+    background-color: rgba(255, 30, 130, 0.08);
+}
+
+/* SECTION */
+section {
+    padding: 0 20px 100px 20px;
+}
+
+/* TITULO */
+.tituloCima {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 30px;
+    margin-bottom: 25px;
+}
+
+.nomeLista {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.observacoesLista {
+    font-size: 15px;
+    color: #888;
+}
+
+/* CARD PRINCIPAL */
+.card1 {
+    background-color: white;
+    border-radius: 18px;
+    padding: 25px;
+    margin-bottom: 35px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+/* FINANCEIRO */
+.financeiro {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.tipoMarcado {
+    text-align: center;
+}
+
+.tituloFinanceiro {
+    font-size: 10px;
+    color: #afaaaa;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.valorPreto {
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.valorRosa {
+    font-size: 19px;
+    font-weight: bold;
+    color: #FF1E82;
+}
+
+/* TETO */
+.TETO {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.teto {
+    font-weight: bold;
+    color: #1A1A1A;
+}
+
+.VerificaTetoVerde {
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.VerificaTetoVermelho {
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.VerificaTetoAmarelo {
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #fff9c4;
+    color: #f57f17;
+}
+
+/* TEXTO SEÇÃO */
+section > p {
+    font-size: 12px;
+    font-weight: bold;
+    color: #afaaaa;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* CARD ITEM */
+.card2 {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* BOTÃO CHECK */
+.btn-check {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* STATUS ITEM */
+.statusItemYES {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #FF1E82;
+
+    background-color: #FF1E82;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.statusItemNOT {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #FF1E82;
+
+    background-color: white;
+    color: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* INFO ITEM */
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.nomeItem {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.categoriaItem {
+    font-size: 13px;
+    color: #999;
+}
+
+/* PREÇO + SETA */
+.precoUnitario {
+    font-weight: bold;
+    color: #1A1A1A;
+    display: flex;
+    align-items: center;
+}
+
+/* SETA ITEM */
+.setaItem {
+    margin-left: 25px;
+    text-decoration: none;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    color: #FF1E82;
+    font-size: 22px;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.setaItem:hover {
+    background-color: rgba(255, 30, 130, 0.08);
+}
+
+/* BOTÃO ADICIONAR */
+.btn-add {
+    background-color: #FF1E82;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    box-shadow: 0 6px 20px rgba(255, 30, 130, 0.3);
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.acoesCompartilhar {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.acoesCompartilhar form {
+    flex: 1;
+    display: flex;
+    gap: 5px;
+}
+
+.acoesCompartilhar input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: white;
+}
+
+.btnCompartilhar {
+    background-color: #FF1E82;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}

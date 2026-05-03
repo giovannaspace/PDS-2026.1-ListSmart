@@ -1,0 +1,100 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+    color: #111111;
+}
+
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: white;
+}
+
+header h2 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.menuIcon {
+    font-size: 20px;
+    cursor: pointer;
+    color: #313030;
+    transition: opacity 0.2s;
+}
+
+.menuIcon:hover {
+    opacity: 0.5;
+}
+
+
+section {
+    padding: 20px;
+}
+
+section p {
+    font-size: 11px;
+    font-weight: bold;
+    color: #353434;
+    margin-bottom: 8px;
+    margin-top: 20px;
+    text-transform: uppercase;
+}
+
+
+.nomeLista, .tetoLista {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #1A1A1A;
+    background: transparent;
+}
+
+
+.btCriar {
+    width: 100%;
+    background-color: #FF1E82;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 16px;
+    height: 55px;
+    margin-top: 40px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    opacity: 0.9;
+}
+
+.btCriar:hover {
+    opacity: 1; 
+}
+
+
+input[list] {
+    cursor: pointer;
+}
+
+
+datalist option {
+    background-color: white;
+    color: #333;
+}

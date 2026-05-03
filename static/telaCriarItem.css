@@ -1,0 +1,146 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+}
+
+header h2 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.menuIcon {
+    font-size: 20px;
+    cursor: pointer;
+    color: #555;
+    transition: opacity 0.2s;
+}
+
+.btSave {
+    color: #FF1E82;
+    background: none;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    opacity: 0.8;
+}
+
+section {
+    padding: 20px;
+}
+
+section p {
+    font-size: 11px;
+    font-weight: bold;
+    color: #afaaaa;
+    margin-bottom: 8px;
+    margin-top: 18px;
+    text-transform: uppercase;
+}
+
+.nomeItem, .unidade, .precoUnitario, .cat, .obs, .qtd, .promo {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #1A1A1A;
+    background: transparent;
+}
+
+.cardDividido {
+    display: flex;
+    gap: 15px;
+}
+
+.col {
+    flex: 1;
+}
+
+.qtd {
+    padding: 8px 12px;
+}
+
+.controle-qtd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-menos, .btn-mais {
+    background-color: #FFF0F6;
+    color: #FF1E82;
+    border: none;
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    opacity: 0.7;
+}
+
+.input-qtd {
+    width: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.btFinalizar {
+    width: 100%;
+    background-color: #FF1E82;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 16px;
+    height: 55px;
+    margin-top: 35px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    opacity: 0.9;
+}
+
+.btn-menos:hover, 
+.btn-mais:hover, 
+.btFinalizar:hover, 
+.btSave:hover,
+.menuIcon:hover {
+    opacity: 1;
+}
+
