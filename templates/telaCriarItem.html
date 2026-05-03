@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='item.css') }}"
+    />
+    <title>Adicionar Item</title>
+  </head>
+  <body>
+    <header>
+      <a href="{{ url_for('listas') }}">
+        <div class="menuIcon">&#10094;</div>
+      </a>
+      <h2>Adicionar Item</h2>
+      <button class="btSave">Save</button>
+    </header>
+
+    <section>
+      <form method="POST" action="{{ url_for('criarItem', idLista=idLista) }}">
+        <p>NOME DO ITEM</p>
+        <div class="nomeItem">
+          <input
+            type="text"
+            name="nomeItem"
+            list="itens-cadastrados"
+            placeholder="Ex: Arroz"
+            required
+          />
+          <datalist id="itens-cadastrados">
+            {% for cat in catItens %}
+            <option value="{{ cat }}"></option>
+            {% endfor %}
+          </datalist>
+
+        </div>
+
+        <div class="cardDividido">
+          <div class="col">
+            <p>QUANTIDADE</p>
+              <div class="unidade">
+              <input
+                type="text"
+                name="quantidade"
+                placeholder="Quantidade (ex: 2, 10)"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="col">
+            <p>UNIDADE</p>
+            <div class="unidade">
+              <input
+                type="text"
+                name="unidade"
+                placeholder="Unidade (ex: kg, un)"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <p>PREÇO UNITÁRIO</p>
+        <div class="precoUnitario">
+          <input type="text" name="preco" placeholder="R$ 0,00" required />
+        </div>
+
+        <p>CATEGORIA</p>
+        <div class="cat">
+          <input
+            type="text"
+            name="categoria"
+            list="categorias-cadastradas"
+            placeholder="Selecione ou digite"
+            required
+          />
+          <datalist id="categorias-cadastradas">
+            {% for categoria in categorias %}
+            <option value="{{ categoria  }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+
+        <p>ITEM PROMOCIONAL</p>
+        <div class="promo">
+          <select name="temPromocao" id="temPromocao">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
+
+        <div id="tipoDiv" style="display: none">
+          <p>TIPO DE PROMOÇÃO</p>
+          <div class="promo">
+            <select name="tipoPromocao" id="tipoPromocao">
+              <option value="">Selecione</option>
+              <option value="porcentagem">Porcentagem</option>
+              <option value="leve">Leve X Pague Y</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="porcentagemDiv" style="display: none">
+          <p>PORCENTAGEM (%)</p>
+          <div class="promo">
+            <input type="number" name="porcentagem" />
+          </div>
+        </div>
+
+        <div id="leveDiv" style="display: none">
+          <p>LEVE X PAGUE Y</p>
+          <div class="promo">
+            <input type="number" name="leveX" placeholder="Leve X" />
+            <input type="number" name="pagueY" placeholder="Pague Y" />
+          </div>
+        </div>
+
+        <p>OBSERVAÇÃO</p>
+        <div class="obs">
+          <input
+            type="text"
+            name="observacao"
+            placeholder="Ex: Marca específica..."
+          />
+        </div>
+        <button
+          type="submit"
+          class="btFinalizar"
+          style="width: 100%; margin-top: 20px"
+        >
+          Adicionar à Lista
+        </button>
+      </form>
+    </section>
+  </body>
+</html>
+
+<script>
+  const temPromo = document.getElementById("temPromocao");
+  const tipoDiv = document.getElementById("tipoDiv");
+  const tipoPromo = document.getElementById("tipoPromocao");
+
+  const porcentagemDiv = document.getElementById("porcentagemDiv");
+  const leveDiv = document.getElementById("leveDiv");
+
+  // quando muda "tem promoção"
+  temPromo.addEventListener("change", function () {
+    if (this.value === "sim") {
+      tipoDiv.style.display = "block";
+    } else {
+      tipoDiv.style.display = "none";
+      porcentagemDiv.style.display = "none";
+      leveDiv.style.display = "none";
+    }
+  });
+
+  // quando muda o tipo
+  tipoPromo.addEventListener("change", function () {
+    porcentagemDiv.style.display = "none";
+    leveDiv.style.display = "none";
+
+    if (this.value === "porcentagem") {
+      porcentagemDiv.style.display = "block";
+    }
+
+    if (this.value === "leve") {
+      leveDiv.style.display = "block";
+    }
+  });
+</script>

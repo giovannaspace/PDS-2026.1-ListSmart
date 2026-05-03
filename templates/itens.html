@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='itens.css') }}"
+    />
+
+    <title>itens</title>
+  </head>
+  <body>
+    <header>
+      <a href="/listas">
+        <div class="menuIcon">&#10094;</div>
+      </a>
+
+      <h2>ListaSmart</h2>
+
+      <img
+        src="{{ url_for('static', filename='vinha.jpeg') }}"
+        alt="foto usuario"
+      />
+    </header>
+
+    <section>
+      <div class="tituloCima">
+        <span class="nomeLista">{{ lista.nomeLista }}</span>
+        <span class="observacoesLista">{{ lista.observacoes }}</span>
+      </div>
+
+      <div class="card1">
+        <div class="financeiro">
+          <div class="tipoMarcado">
+            <span class="tituloFinanceiro">NÃO MARCADOS</span>
+            <p class="valorPreto">R$ {{ pendentes }}</p>
+          </div>
+
+          <div class="tipoMarcado">
+            <span class="tituloFinanceiro">MARCADOS</span>
+            <p class="valorPreto">R$ {{ marcados }}</p>
+          </div>
+
+          <div class="tipoMarcado">
+            <span class="tituloFinanceiro">TOTAL GERAL</span>
+            <p class="valorRosa">R$ {{ totalGeral }}</p>
+          </div>
+        </div>
+
+        <div class="tetoOrcamentario">
+          <div class="TETO">
+            <p>Teto do Orçamento</p>
+            <span class="teto">R$ {{ lista.tetoOrcamentario }}</span>
+          </div>
+
+          <div
+            class="{% if tetoInfo.status == 'verde' %} VerificaTetoVerde {% elif tetoInfo.status == 'vermelho' %} VerificaTetoVermelho {% else %} VerificaTetoAmarelo {% endif %}"
+          >
+            {{ tetoInfo.mensagem }}
+          </div>
+        </div>
+      </div>
+
+      <div class="acoesCompartilhar">
+        <form
+          method="POST"
+          action="{{ url_for('compartilhar_email', idLista=lista.idLista) }}"
+        >
+          <input
+            type="email"
+            name="email"
+            placeholder="Email destino"
+            required
+          />
+          <button type="submit" class="btnCompartilhar">📧 Email</button>
+        </form>
+
+        <form
+          method="POST"
+          action="{{ url_for('compartilhar_zap', idLista=lista.idLista) }}"
+        >
+          <input
+            type="text"
+            name="numero"
+            placeholder="WhatsApp (ex: 559999999999)"
+            required
+          />
+          <button type="submit" class="btnCompartilhar">💬 WhatsApp</button>
+        </form>
+      </div>
+
+      <p>               </p>
+      <p>               </p>
+      <p>               </p>
+      <p>ITENS DA LISTA</p>
+
+      {% for item in itens %}
+      <div class="card2">
+        <form
+          method="POST"
+          action="{{ url_for('marcarItem', idLista=idLista) }}"
+        >
+          <input type="hidden" name="idItem" value="{{ item.idItem }}" />
+
+          <button type="submit" class="btn-check">
+            <span
+              class="{{ 'statusItemYES' if item.statusCompra|int == 1 else 'statusItemNOT' }}"
+            >
+              {% if item.statusCompra|int == 1 %} &#10003; {% endif %}
+            </span>
+          </button>
+        </form>
+
+        <div class="infoItem">
+          <span class="nomeItem">{{ item.nomeItem }}</span>
+          <span class="categoriaItem">{{ item.categorias }}</span>
+        </div>
+
+        <span class="precoUnitario"
+          >R$ {{ item.precoUnitario }}
+          <a href="{{ url_for('item', idItem=item.idItem) }}" class="setaItem">
+            <span>&#10095;</span>
+          </a>
+        </span>
+      </div>
+      {% endfor %}
+    </section>
+
+    <a href="{{ url_for('criarItem', idLista=lista.idLista) }}">
+      <button class="btn-add"><span>&#10094;</span>Adicionar Item</button>
+    </a>
+  </body>
+</html>

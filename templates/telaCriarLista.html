@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='telaCriarLista.css') }}"
+    />
+
+    <title>Nova Lista</title>
+  </head>
+
+  <body>
+    <header>
+      <a href="{{ url_for('listas') }}">
+        <div class="menuIcon">&#10094;</div>
+      </a>
+      <h2>Nova Lista</h2>
+      <div style="width: 40px"></div>
+    </header>
+
+    <section>
+      <form method="POST" action="{{ url_for('criarLista') }}">
+        <p>NOME DA LISTA</p>
+        <div class="nomeLista">
+          <input
+            type="text"
+            id="nomeLista"
+            name="nomeLista"
+            list="categorias-existentes"
+            placeholder="Ex: Compras Mensais"
+            required
+          />
+
+          <datalist id="categorias-existentes">
+            {% for categoria in categorias %}
+            <option value="{{ categoria  }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+
+        <p>TETO DO ORÇAMENTO</p>
+        <div class="tetoLista">
+          <input type="text" id="teto" name="teto" placeholder="R$ 0,00" />
+        </div>
+
+        <p>OBSERVAÇÃO</p>
+        <div class="tetoLista">
+          <input type="text" id="observacoes" name="observacoes" />
+        </div>
+
+        <button type="submit" class="btCriar">Criar Lista</button>
+      </form>
+    </section>
+  </body>
+</html>

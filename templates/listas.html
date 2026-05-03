@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='listas.css') }}">
+    <title>listas</title>
+  </head>
+  <body>
+    <header>
+      <div class="menuIcon">&#9776;</div> <h2>ListaSmart</h2>
+      <img src="{{ url_for('static', filename='vinha.jpeg') }}" alt="foto usuário">
+    </header>
+
+    <section>
+      <h1>Listas</h1>
+      <p>Organize suas compras com inteligência.</p>
+
+
+      <!-- Aqui vai deixar a lista dinâmica. Ou seja, vai mostrar relamente as listas do usuario -->
+      {% for lista in listas %}
+      <div class="cadsLista">
+          <span class="badgeItens">{{ lista.quantidade }} itens</span>
+          <h3>{{ lista.nome }}</h3>
+            <div class="paragrafoCardsBotao">
+                <p class="paragrafoCards">
+                    <span class="iconeCalendario">&#128197;</span> Criada em: {{ lista.data }}
+                </p>
+                <a href="{{ url_for('itens', idLista=lista.id) }}">
+                  <button class="bt">&#10095</button>
+                </a>
+               
+            </div>
+      </div>
+      {% endfor %}
+
+    </section>
+
+    <a href="{{ url_for('criarLista') }}">
+        <button>
+          <span>&#43;</span>Nova Lista
+        </button>
+    </a>
+  </body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='item.css') }}"
+    />
+    <title>item</title>
+  </head>
+  <body>
+    <header>
+      <div class="menuIcon">&#10094;</div>
+      <h2>Detalhes do Item</h2>
+      <button class="btSave">Save</button>
+    </header>
+
+    <section>
+      <form method="POST" action="{{ url_for('item', idItem=itemRec.idItem) }}">
+        <p>NOME DO ITEM</p>
+        <div class="nomeItem">
+          <input
+            type="text"
+            name="nome"
+            value="{{ itemRec.nomeItem }}"
+            required
+          />
+        </div>
+
+        <div class="cardDividido">
+          <div class="col">
+            <p>QUANTIDADE</p>
+            <div class="qtd">
+              <div class="controle-qtd">
+                <button type="button" class="btn-menos">-</button>
+                <input
+                  type="number"
+                  name="quantidade"
+                  value="{{ itemRec.quantidade }}"
+                  class="input-qtd"
+                />
+                <button type="button" class="btn-mais">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <p>UNIDADE</p>
+            <div class="unidade">
+              <input type="text" name="unidade" value="{{ itemRec.unidade }}" />
+            </div>
+          </div>
+        </div>
+
+        <p>PREÇO UNITÁRIO</p>
+        <div class="precoUnitario">
+          <input
+            type="number"
+            step="0.01"
+            name="preco"
+            value="{{ itemRec.precoUnitario }}"
+            required
+          />
+        </div>
+
+        <p>CATEGORIA</p>
+        <div class="cat">
+          <input
+            type="text"
+            name="categoria"
+            value="{{ itemRec.categorias }}"
+          />
+        </div>
+
+        <p>OBSERVAÇÃO</p>
+        <div class="obs">
+          <input
+            type="text"
+            name="nota"
+            value="{{ itemRec.observacoesItem }}"
+          />
+        </div>
+
+        <div class="acoes">
+          <!-- deletar usando o mesmo form -->
+          <button
+            class="btLixeira"
+            type="submit"
+            name="acao"
+            value="deletar"
+            formaction="{{ url_for('deletarItem', idItem=itemRec.idItem) }}"
+          >
+            🗑️
+          </button>
+
+          <!-- atualizar -->
+          <button class="btFinalizar" type="submit" name="acao" value="salvar">
+            Finalizar Item
+          </button>
+        </div>
+      </form>
+    </section>
+  </body>
+</html>
