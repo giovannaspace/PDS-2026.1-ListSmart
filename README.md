@@ -49,8 +49,8 @@ O **ListSmart** é um gerenciador de compras que ajuda o usuário a organizar li
 
 O usuário pode escolher entre:
 
-* Item comum
-* Item promocional
+* Item Comum
+* Item Promocional
 
 Tipos de desconto disponíveis:
 
@@ -67,7 +67,7 @@ O sistema informa automaticamente:
 
 * 🔴 Ultrapassou o limite
 * 🟡 Atingiu exatamente o limite
-* 🟢 Dentro do orçamento
+* 🟢 Dentro do Orçamento
 
 ---
 
