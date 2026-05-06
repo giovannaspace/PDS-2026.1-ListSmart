@@ -5,6 +5,17 @@ Repositório desenvolvido para a disciplina de **Projeto de Software** – UFAL.
 O **ListSmart** é um gerenciador de compras que ajuda o usuário a organizar listas de supermercado de forma simples, prática e eficiente.
 
 ---
+## Implementação de design pattern criacional BUILDER (em andamento...)
+👉 O Builder permite a construção de diferentes tipos de objetos passo a passo, a partir do mesmo código de construção.  
+* Pode ser utilizado como uma opção mais compacta em relação ao construtor presente na relação de herança, assim como gerenciar as funções do banco de dados.
+```
+class Item(ABC)
+class ItemComum(Item)
+class ItemPromocional(Item)
+```
+* A implementação de uma **classe Builder** 
+
+
 
 ## 🚀 Funcionalidades
 
