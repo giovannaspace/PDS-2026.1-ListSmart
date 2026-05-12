@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, redirect, session,url_for
-
-
 from backend import *
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = "segredo"
+app.secret_key = os.environ.get("SECRET_KEY")
 
 
 

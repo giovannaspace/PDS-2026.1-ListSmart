@@ -677,8 +677,8 @@ class compartilhamento():
     
         self.__lista = listaRec
         
-        self.__email_remetente = "listasmart396@gmail.com"
-        self.__senha = "ftle nhxv jdre vjiz"
+        self.__email_remetente = os.environ.get("EMAIL")
+        self.__senha = os.environ.get("EMAIL_PASSWORD")
     
     
     def formatarParaTexto(self):
