@@ -1,1 +1,21 @@
+# Ambiente virtual
 venv/
+.venv/
+env/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Arquivos de configuração e credenciais
+.env
+.secrets
+*.db
+
+# IDEs e Editores
+.vscode/
+.idea/
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
