@@ -16,7 +16,105 @@ console = Console()
 
 print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
 
-      
+from builder import *
+from classes_dados import *
+'''
+######################## IMPLEMENTAÇÃO DESIGN PATTERN CRIACIONAL BUILDER ########################
+
+# ETAPA 1: DEFINIÇÃO DOS MÉTODOS DE ACORDO COM OS ATRIBUTOS DO ITEM -> INTERFACE DO BUILDER
+class metodosBuilder(ABC):
+    @abstractmethod
+    def definir_nome():
+        pass
+
+    @abstractmethod
+    def definir_quantidade():
+        pass
+
+    @abstractmethod
+    def definir_unidade():
+        pass
+
+    @abstractmethod
+    def definir_preco():
+        pass
+
+    @abstractmethod
+    def definir_desconto():
+        pass
+
+    @abstractmethod
+    def definir_observacoes():
+        pass
+
+    @abstractmethod
+    def definir_status():
+        pass
+
+    @abstractmethod  
+    def definir_dono():  #duvida
+        pass
+
+    @abstractmethod
+    def definir_categoria():
+        pass
+
+# ETAPA 2: IMPLEMENTAÇÃO DOS MÉTODOS
+
+class itemBuilder():
+
+    def __init__(self):
+        self.nome = None
+        self.quantidade = None
+        self.unidade = None
+        self.preco = None
+        self.desconto = None
+        self.observacoes = None
+        self.status = None
+        self.dono = None
+        self.categoria = None
+
+    
+    def definir_nome(self,nome):
+        self.nome = nome
+        return self
+    
+    def definir_quantidade(self,quantidade):
+        self.quantidade = quantidade
+        return self
+
+    def definir_unidade(self,unidade):
+        self.unidade = unidade
+        return self
+
+    def definir_preco(self,preco):
+        self.preco = preco
+        return self
+
+    def definir_desconto(self,desconto):
+        self.desconto = desconto
+        return self
+
+    def definir_observacoes(self,observacoes):
+        self.observacoes = observacoes
+        return self
+
+    def definir_status(self,status):
+        self.status = status
+        return self
+
+    def definir_dono(self,dono):  #duvida
+        self.dono = dono
+        return self
+
+    def definir_categoria(self,categoria):
+        self.categoria = categoria
+        return self
+
+'''
+
+
+
 
 ######################## Parte do Banco de Dados ######################################
 def bancoDados():
@@ -103,6 +201,8 @@ def ItemNovaBD(itens):
     conexao.commit()
     conexao.close()
 
+#DEBUG
+    print(itens.nomeItem, itens.quantidade, itens.unidade,itens.precoUnitario,itens.desconto,itens.statusCompra,itens.idDonoItem,itens.observacoesItem,itens.categorias)
 
 class Usuario():
     def __init__(self, nome, email, senha, idUsuario = None):
@@ -411,172 +511,6 @@ class Lista():
                 "status" : "verde",
                 "mensagem" : f"Dentro do orçamento. Você ainda pode gastar R$ {diferenca:.2f}"
             }
-
-class Item(ABC):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
-
-        self.nomeItem = nomeItem
-        self.quantidade = quantidade
-        self.unidade = unidade
-        self.precoUnitario = precoUnitario
-        self.desconto = desconto
-        self.observacoesItem = observacoesItem
-        self.statusCompra = statusCompra
-        self.idItem = idItem if idItem else str(uuid.uuid4())
-        self.idDonoItem = idDonoItem
-        self.categorias = categorias
-
-
-    @abstractmethod
-    def calcularPreco():
-        pass
-
-    @staticmethod
-    def paraTuplas(linhas):
-        if linhas[5] == 0 or linhas[5] is None:
-                return ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
-
-        else:
-                return ItemPromocional(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
-
-    @staticmethod
-    def reconstruirItem(idItem):
-        conexao = sqlite3.connect("banco.db")
-        conexao.execute("PRAGMA foreign_keys = ON")
-        cursor = conexao.cursor()
-
-        cursor.execute("SELECT * FROM itens WHERE idItem = ?", (idItem,))
-        linha = cursor.fetchone()
-        conexao.close()
-
-        if not linha:
-            return None
-
-        itemRec = Item.paraTuplas(linha)
-        return itemRec
-
-    def atualizarItem(self,campo,valorNovo):
-        
-        conexao = sqlite3.connect("banco.db")
-        conexao.execute("PRAGMA foreign_keys = ON")
-        cursor = conexao.cursor()
-
-        
-        if campo == "nome":
-            cursor.execute("UPDATE itens SET nomeItem = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
-            conexao.commit()
-            self.nomeItem = valorNovo
-            
-
-        elif campo == "nota":
-            cursor.execute("UPDATE itens SET observacoesItem = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
-            conexao.commit()
-            self.observacoesItem = valorNovo
-            
-
-        elif campo == "preco":
-            cursor.execute("UPDATE itens SET precoUnitario = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
-            conexao.commit()
-            self.precoUnitario = valorNovo
-            
-        
-        elif campo == "unidade":
-            cursor.execute("UPDATE itens SET unidade  = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
-            conexao.commit()
-            self.unidade = valorNovo
-            
-
-        else:
-            conexao.close()
-            return
-        
-        conexao.close()
-  
-    def removerItem(self):
-        conexao = sqlite3.connect("banco.db")
-        conexao.execute("PRAGMA foreign_keys = ON")
-        cursor = conexao.cursor()
-
-        cursor.execute("DELETE FROM itens WHERE idDonoItem = ? AND idItem = ?", (self.idDonoItem,self.idItem))
-
-        conexao.commit()
-        conexao.close()
-    
-    def quantidadeItem(self, opecacao):
-        conexao = sqlite3.connect("banco.db")
-        conexao.execute("PRAGMA foreign_keys = ON")
-        cursor = conexao.cursor()
-
-        cursor.execute("SELECT quantidade FROM itens WHERE idDonoItem = ? AND idItem = ?",(self.idDonoItem,self.idItem))
-        item = cursor.fetchone()
-        conexao.close()
-
-        if item:
-            quantidade = item[0]
-        else:
-            return None
-
-        if opecacao == "+":
-        
-                conexao = sqlite3.connect("banco.db")
-                cursor = conexao.cursor()
-
-                quantidadeNova = quantidade + 1
-                cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
-                                (quantidadeNova,self.idDonoItem, self.idItem))
-                conexao.commit()
-                conexao.close()
-
-        elif opecacao == "-":
-            
-                if quantidade == 1:
-                        
-                    self.removerItem()
-
-                elif quantidade > 1:
-
-                    conexao = sqlite3.connect("banco.db")
-                    cursor = conexao.cursor()
-
-                    quantidadeNova = quantidade - 1
-                    cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
-                                    (quantidadeNova,self.idDonoItem, self.idItem))
-                    conexao.commit()
-                    conexao.close()
-
-class ItemComum(Item):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
-        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=idItem)
-
-    def calcularPreco(self):
-        return self.quantidade * self.precoUnitario
-
-class ItemPromocional(Item):
-    def __init__(self,nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=None):
-        super().__init__(nomeItem, quantidade, unidade, precoUnitario,observacoesItem,categorias,idDonoItem,desconto,statusCompra,idItem=idItem)
-
-
-        self.desconto = desconto
-
-    def calcularPreco(self):
-    
-        if self.desconto >= 0:
-
-            precoComDesconto = self.precoUnitario - self.desconto
-            return self.quantidade * precoComDesconto
-        
-        else:
-            valor = abs(self.desconto)
-
-            x = int(valor // 1000)
-            y = valor % 1000
-
-            qtd_promo = self.quantidade  // x
-            resto = self.quantidade - (x * qtd_promo)
-
-            valorFinal = (resto * self.precoUnitario) + (qtd_promo * y)
-
-            return valorFinal
 
 class GerenciamentoCategoria():
     def __init__(self):

@@ -96,6 +96,7 @@ def itens(idLista):
     return render_template("itens.html",lista=listaRec, itens=itens,idLista=idLista,marcados=marcados,pendentes=pendentes,totalGeral=totalGeral,tetoInfo=tetoInfo)
 
 
+'''
 @app.route("/criarItem/<idLista>", methods=["GET","POST"])
 def criarItem(idLista):
 
@@ -121,6 +122,61 @@ def criarItem(idLista):
                 Lista.adicionarItem(idLista,nome, qtd, unidade, preco,obs,categoria,"s",2,x,y,0)
         else:
             Lista.adicionarItem(idLista,nome, qtd, unidade, preco,obs,categoria,"n",0,0,0,0)
+
+        return redirect(url_for("itens",idLista=idLista))
+                
+    categorias = gerente.sugestaoNomeLista()
+    catItens = gerente.sugestaoNomeItem()
+    return render_template("telaCriarItem.html",categorias=categorias,catItens=catItens,idLista=idLista)
+'''
+@app.route("/criarItem/<idLista>", methods=["GET","POST"])
+def criarItem(idLista):
+
+    if request.method == "POST":
+        nome = request.form["nomeItem"]
+        qtd = int(request.form["quantidade"])
+        unidade = request.form["unidade"]
+        preco = float(request.form["preco"])
+        categoria = request.form["categoria"]
+        obs = request.form["observacao"]
+
+        temPromo = request.form["temPromocao"]
+        tipo = request.form.get("tipoPromocao")
+
+        builder = itemBuilder()
+
+        if temPromo == "sim":
+            if tipo == "porcentagem":  #tipo 1
+                porcentagem = int(request.form.get("porcentagem") or 0)
+                desconto_calculo = tipoDesconto(preco,1,0,0,porcentagem)
+                 # debug print(desconto_calculo)
+                director = builderDirector(builder, nome, qtd, unidade, preco, obs, categoria, idLista, desconto_calculo, 0)
+
+                #director = builderDirector(builder,nome,qtd,unidade,preco,desconto_calculo,obs,0,idLista,categoria)
+                item = director.get_Promo()
+                ItemNovaBD(item) # antes estava no metodo adicionarItem da classe Lista
+                #Lista.adicionarItem(idLista,nome, qtd, unidade, preco,obs,categoria,"s",1,0,0,porcentagem)
+
+            elif tipo == "leve": #tipo 2
+                x = int(request.form.get("leveX") or 0)
+                y = int(request.form.get("pagueY") or 0)
+                desconto_calculo = tipoDesconto(preco,2,x,y,0)
+
+                # debug print(desconto_calculo)
+                director = builderDirector(builder, nome, qtd, unidade, preco, obs, categoria, idLista, desconto_calculo, 0)
+                #director = builderDirector(builder,nome,qtd,unidade,preco,desconto_calculo,obs,0,idLista,categoria)
+                item = director.get_Promo()
+                ItemNovaBD(item) # antes estava no metodo adicionarItem da classe Lista
+
+                #Lista.adicionarItem(idLista,nome, qtd, unidade, preco,obs,categoria,"s",2,x,y,0)
+        else:
+            director = builderDirector(builder, nome, qtd, unidade, preco, obs, categoria, idLista, 0, 0)
+
+            #director = builderDirector(builder,nome,qtd,unidade,preco,0,obs,0,idLista,categoria)
+            item = director.get_Comum()
+            ItemNovaBD(item) # antes estava no metodo adicionarItem da classe Lista
+
+            #Lista.adicionarItem(idLista,nome, qtd, unidade, preco,obs,categoria,"n",0,0,0,0)
 
         return redirect(url_for("itens",idLista=idLista))
                 
