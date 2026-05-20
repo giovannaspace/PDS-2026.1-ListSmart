@@ -6,16 +6,8 @@ O **ListSmart** é um gerenciador de compras que ajuda o usuário a organizar li
 
 ---
 ## Implementação de design pattern criacional BUILDER (em andamento...)
-👉 O Builder permite a construção de diferentes tipos de objetos passo a passo, a partir do mesmo código de construção.  
-* Pode ser utilizado como uma opção mais compacta em relação ao construtor presente na relação de herança, assim como gerenciar as funções do banco de dados.
-```
-class Item(ABC)
-class ItemComum(Item)
-class ItemPromocional(Item)
-```
-* A implementação de uma **classe Builder** 
-
-
+👉 O **Builder**  permite a construção de diferentes tipos de objetos passo a passo, a partir do mesmo código de construção.  
+* Sua estrutura é feita através de classes responsáveis pela declaração e implementação dos métodos desejados e um Director que coordena a construção do produto final. Para este caso, o builder substitui o uso do método `adicionar_item` da classe `Lista`.  
 
 ## 🚀 Funcionalidades
 
