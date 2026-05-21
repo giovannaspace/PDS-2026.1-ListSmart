@@ -9,6 +9,13 @@ O **ListSmart** é um gerenciador de compras que ajuda o usuário a organizar li
 👉 O **Builder**  permite a construção de diferentes tipos de objetos passo a passo, a partir do mesmo código de construção.  
 * Sua estrutura é feita através de classes responsáveis pela declaração e implementação dos métodos desejados e um Director que coordena a construção do produto final. Para este caso, o builder substitui o uso do método `adicionar_item` da classe `Lista`.  
 
+## Implementação de design pattern estrutural FACADE (em andamento...)  
+---
+## Implementação de design pattern comportamental OBSERVER (em andamento...)
+
+
+
+
 ## 🚀 Funcionalidades
 
 1. **Cadastro e Login**
