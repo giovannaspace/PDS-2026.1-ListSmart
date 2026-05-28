@@ -18,103 +18,6 @@ print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
 
 from builder import *
 from classes_dados import *
-'''
-######################## IMPLEMENTAÇÃO DESIGN PATTERN CRIACIONAL BUILDER ########################
-
-# ETAPA 1: DEFINIÇÃO DOS MÉTODOS DE ACORDO COM OS ATRIBUTOS DO ITEM -> INTERFACE DO BUILDER
-class metodosBuilder(ABC):
-    @abstractmethod
-    def definir_nome():
-        pass
-
-    @abstractmethod
-    def definir_quantidade():
-        pass
-
-    @abstractmethod
-    def definir_unidade():
-        pass
-
-    @abstractmethod
-    def definir_preco():
-        pass
-
-    @abstractmethod
-    def definir_desconto():
-        pass
-
-    @abstractmethod
-    def definir_observacoes():
-        pass
-
-    @abstractmethod
-    def definir_status():
-        pass
-
-    @abstractmethod  
-    def definir_dono():  #duvida
-        pass
-
-    @abstractmethod
-    def definir_categoria():
-        pass
-
-# ETAPA 2: IMPLEMENTAÇÃO DOS MÉTODOS
-
-class itemBuilder():
-
-    def __init__(self):
-        self.nome = None
-        self.quantidade = None
-        self.unidade = None
-        self.preco = None
-        self.desconto = None
-        self.observacoes = None
-        self.status = None
-        self.dono = None
-        self.categoria = None
-
-    
-    def definir_nome(self,nome):
-        self.nome = nome
-        return self
-    
-    def definir_quantidade(self,quantidade):
-        self.quantidade = quantidade
-        return self
-
-    def definir_unidade(self,unidade):
-        self.unidade = unidade
-        return self
-
-    def definir_preco(self,preco):
-        self.preco = preco
-        return self
-
-    def definir_desconto(self,desconto):
-        self.desconto = desconto
-        return self
-
-    def definir_observacoes(self,observacoes):
-        self.observacoes = observacoes
-        return self
-
-    def definir_status(self,status):
-        self.status = status
-        return self
-
-    def definir_dono(self,dono):  #duvida
-        self.dono = dono
-        return self
-
-    def definir_categoria(self,categoria):
-        self.categoria = categoria
-        return self
-
-'''
-
-
-
 
 ######################## Parte do Banco de Dados ######################################
 def bancoDados():
@@ -511,6 +414,29 @@ class Lista():
                 "status" : "verde",
                 "mensagem" : f"Dentro do orçamento. Você ainda pode gastar R$ {diferenca:.2f}"
             }
+
+# função que antes estava no app.py
+def atualizar_quant_e_categoria(itemRec,quantidade,categoria):
+        conexao = sqlite3.connect("banco.db")
+        cursor = conexao.cursor()
+
+        if quantidade:
+            cursor.execute("""
+            UPDATE itens SET quantidade = ?
+            WHERE idItem = ? AND idDonoItem = ?
+            """, (int(quantidade), itemRec.idItem, itemRec.idDonoItem))
+
+        if categoria:
+            cursor.execute("""
+                UPDATE itens SET idCategoria = ?
+                WHERE idItem = ? AND idDonoItem = ?
+            """, (categoria, itemRec.idItem, itemRec.idDonoItem))
+
+        conexao.commit()
+        conexao.close()
+
+
+
 
 class GerenciamentoCategoria():
     def __init__(self):
