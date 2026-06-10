@@ -14,19 +14,12 @@ O facade age como uma interface em um sistema de classes ou bibliotecas.
 * Sua estrutura é feita por uma ou mais classes principais, dependendo da complexidade, que possui todas as chamadas de funções principais daquele(s) sistema(s).
 * Para esse projeto, a implementação do Facade serviu como um intermediário entre o `app.py`, onde estavam as rotas utilizadas pelo Flask, e o `backend.py`, onde estão as implementações das funções. Portanto, houve uma divisão de responsabilidades. O `app.py` agora possui apenas as funções com as rotas Flask e as chamadas do facade, que admnistra de forma organizada a comunicação entre o backend e a entrada de dados pelo usuário.
 Para implementações futuras, basta editar o facade e apenas adicionar a chamada junto da rota específica.
-<<<<<<< HEAD
-=======
-
-## Implementação de design pattern comportamental OBSERVER (em andamento...)
-O observer é utilizado dentro de uma relação de um para muitos, ou seja, quando um evento/mudança em um determinado objeto, por exemplo, precisa ser notificado e/ou refletido para outros objetos ou sistemas.
-* Sua estrutura é feita através de uma herança abstrata, classes responsáveis por identificar o Observer (observador) e o Subject (assunto) com as declarações e implementações dos metodos relacionados a cada um dentro do contexto do sistema.
-* 
->>>>>>> 0758ac7ea4cb9b9b55da43ad435e09cec139f274
 
 ## Implementação de design pattern comportamental Observer
 O observer é utilizado dentro de uma relação de um para muitos, ou seja, quando um evento/mudança em um determinado objeto, por exemplo, precisa ser notificado e/ou refletido para outros objetos ou sistemas.
 * Sua estrutura é feita através de uma herança abstrata, classes responsáveis por identificar o Observer (observador) e o Subject (assunto) com as declarações e implementações dos metodos relacionados a cada um dentro do contexto do sistema.
 * 
+
 
 ## 🚀 Funcionalidades
 
