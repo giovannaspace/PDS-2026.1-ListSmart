@@ -16,7 +16,7 @@ console = Console()
 
 print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
 
-from builder import *
+#from builder import *
 from classes_dados import *
 
 ######################## Parte do Banco de Dados ######################################
@@ -105,7 +105,7 @@ def ItemNovaBD(itens):
     conexao.close()
 
 #DEBUG
-    print(itens.nomeItem, itens.quantidade, itens.unidade,itens.precoUnitario,itens.desconto,itens.statusCompra,itens.idDonoItem,itens.observacoesItem,itens.categorias)
+    #print(itens.nomeItem, itens.quantidade, itens.unidade,itens.precoUnitario,itens.desconto,itens.statusCompra,itens.idDonoItem,itens.observacoesItem,itens.categorias)
 
 class Usuario():
     def __init__(self, nome, email, senha, idUsuario = None):
