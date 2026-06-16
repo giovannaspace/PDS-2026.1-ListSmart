@@ -7,7 +7,7 @@ O **ListSmart** é um gerenciador de compras que ajuda o usuário a organizar li
 ## Implementação de design pattern criacional Builder
  O **Builder**  permite a construção de diferentes tipos de objetos passo a passo, a partir do mesmo código de construção.  
 * Sua estrutura é feita através de uma herança abstrata, classes responsáveis pela declaração e implementação dos métodos desejados e um Director que coordena a construção do produto final. Para este caso, o builder substitui o uso do método `adicionar_item` da classe `Lista`.  
-* Para esse projeto, a implementação do Builder além de modularizar o código, une todas as possibilidades para criação de um item na lista em um conjunto de classes, facilitando também possíveis alterações futuras.
+* Para esse projeto, a implementação do Builder além de modularizar o código, une todas as possibilidades para criação de um item na lista em um conjunto de classes, facilitando também possíveis alterações futuras. Também substituiu o `adicionarItem()` que possuía um grande número de parâmetros para administrar.
 
 ## Implementação de design pattern estrutural Facade  
 O facade age como uma interface em um sistema de classes ou bibliotecas.
@@ -18,7 +18,7 @@ Para implementações futuras, basta editar o facade e apenas adicionar a chamad
 ## Implementação de design pattern comportamental Observer
 O observer é utilizado dentro de uma relação de um para muitos, ou seja, quando um evento/mudança em um determinado objeto, por exemplo, precisa ser notificado e/ou refletido para outros objetos ou sistemas.
 * Sua estrutura é feita através de uma herança abstrata, classes responsáveis por identificar o Observer (observador) e o Subject (assunto) com as declarações e implementações dos metodos relacionados a cada um dentro do contexto do sistema.
-* 
+* Para esse projeto, o observer muda a arquitetura do código na funcionalidade de compartilhamento, também de forma a facilitar a adição de outros canais de compartilhamento.
 
 
 ## 🚀 Funcionalidades
@@ -170,8 +170,3 @@ for item in lista:
 
 ---
 
-## 📌 Roadmap
-
-* 🔄 Sincronização entre usuários
-  Permitir que múltiplos usuários editem a mesma lista em tempo real.
-  
