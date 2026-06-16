@@ -127,6 +127,23 @@ class Facade():
     
 
     @staticmethod
+    def chamada_observer_facade(idLista,email,numero,n):
+        listaRec = Lista.recontruirLista(idLista)
+        objeto_observado = ConcreteSubject(listaRec)
+        objeto_wpp = ConcreteObserver_1()
+        objeto_email = ConcreteObserver_2()
+
+        if n == 1:
+            objeto_observado.attach(objeto_wpp) 
+        else:
+            objeto_observado.attach(objeto_email) 
+            
+        objeto_observado.notify(email,numero)
+
+
+
+'''
+    @staticmethod
     def email_facade(idLista,email):
         listaRec = Lista.recontruirLista(idLista)
         comp = compartilhamento(listaRec)
@@ -138,3 +155,4 @@ class Facade():
         listaRec = Lista.recontruirLista(idLista)
         comp = compartilhamento(listaRec)
         comp.enviarZap(numero)
+'''

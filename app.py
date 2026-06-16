@@ -223,7 +223,12 @@ def compartilhar_email(idLista):
 
     email = request.form.get("email")
     # CHAMADA FACADE
-    Facade.email_facade(idLista,email)
+    Facade.chamada_observer_facade(idLista,email,0,2)
+
+    #Facade.email_facade(idLista,email)
+    
+    
+    
     #comp = compartilhamento(listaRec)
     #comp.enviarEmail(email)
 
@@ -236,7 +241,12 @@ def compartilhar_zap(idLista):
     #listaRec = Lista.recontruirLista(idLista)
 
     numero = request.form.get("numero")
-    Facade.zap_facade(idLista,numero)
+
+    Facade.chamada_observer_facade(idLista,0,numero,1)
+   # Facade.zap_facade(idLista,numero)
+    
+    
+    
     #comp = compartilhamento(listaRec)
     #comp.enviarZap(numero)
 
