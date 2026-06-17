@@ -23,7 +23,7 @@ print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
 #from builder import *
 from classes_dados import *
 
-db_pool = pool.ThreadedConnectionPool(
+db_pool = pool.SimpleConnectionPool(
     minconn=5,
     maxconn=10,
     keepalives=1,
