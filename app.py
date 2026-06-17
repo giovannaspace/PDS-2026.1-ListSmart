@@ -10,7 +10,6 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
 
-
 bancoDados()
 gerente = GerenciamentoCategoria()
 gerente.categoria()
@@ -253,4 +252,5 @@ def compartilhar_zap(idLista):
     return redirect(url_for("listas", idLista=idLista))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+   # app.run(debug=True)
+    app.run
