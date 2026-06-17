@@ -26,6 +26,11 @@ from classes_dados import *
 db_pool = pool.ThreadedConnectionPool(
     minconn=5,
     maxconn=10,
+    keepalives=1,
+    keepalives_idle=30, 
+    keepalives_interval=10, 
+    keepalives_count=5,
+
     dsn=os.environ.get("DATABASE_URL")
 )
 ######################## Parte do Banco de Dados ######################################
