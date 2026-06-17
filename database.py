@@ -3,7 +3,7 @@ import sqlite3
 ######################## Parte do Banco de Dados ######################################
 def bancoDados():
     
-    conexao = sqlite3.connect("banco.db")
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     conexao.execute("PRAGMA foreign_keys = ON")
     cursor = conexao.cursor()
     

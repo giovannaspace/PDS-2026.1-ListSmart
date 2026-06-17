@@ -1,4 +1,6 @@
 import sqlite3
+import psycopg2
+
 import uuid
 from abc import ABC, abstractmethod
 
@@ -23,6 +25,7 @@ class Item(ABC):
 
     @staticmethod
     def paraTuplas(linhas):
+        
         if linhas[5] == 0 or linhas[5] is None:
                 return ItemComum(linhas[1],linhas[2], linhas[3], linhas[4], linhas[8], linhas[9], linhas[7],linhas[5],linhas[6], linhas[0])
 
@@ -31,11 +34,11 @@ class Item(ABC):
 
     @staticmethod
     def reconstruirItem(idItem):
-        conexao = sqlite3.connect("banco.db")
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
 
-        cursor.execute("SELECT * FROM itens WHERE idItem = ?", (idItem,))
+        cursor.execute("SELECT * FROM itens WHERE idItem = %s", (idItem,))
         linha = cursor.fetchone()
         conexao.close()
 
@@ -47,31 +50,31 @@ class Item(ABC):
 
     def atualizarItem(self,campo,valorNovo):
         
-        conexao = sqlite3.connect("banco.db")
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
 
         
         if campo == "nome":
-            cursor.execute("UPDATE itens SET nomeItem = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
+            cursor.execute("UPDATE itens SET nomeItem = %s WHERE idItem = %s AND idDonoItem = %s", (valorNovo,self.idItem,self.idDonoItem))
             conexao.commit()
             self.nomeItem = valorNovo
             
 
         elif campo == "nota":
-            cursor.execute("UPDATE itens SET observacoesItem = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
+            cursor.execute("UPDATE itens SET observacoesItem = %s WHERE idItem = %s AND idDonoItem = %s", (valorNovo,self.idItem,self.idDonoItem))
             conexao.commit()
             self.observacoesItem = valorNovo
             
 
         elif campo == "preco":
-            cursor.execute("UPDATE itens SET precoUnitario = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
+            cursor.execute("UPDATE itens SET precoUnitario = %s WHERE idItem = %s AND idDonoItem = %s", (valorNovo,self.idItem,self.idDonoItem))
             conexao.commit()
             self.precoUnitario = valorNovo
             
         
         elif campo == "unidade":
-            cursor.execute("UPDATE itens SET unidade  = ? WHERE idItem = ? AND idDonoItem = ?", (valorNovo,self.idItem,self.idDonoItem))
+            cursor.execute("UPDATE itens SET unidade  = %s WHERE idItem = %s AND idDonoItem = %s", (valorNovo,self.idItem,self.idDonoItem))
             conexao.commit()
             self.unidade = valorNovo
             
@@ -83,21 +86,21 @@ class Item(ABC):
         conexao.close()
   
     def removerItem(self):
-        conexao = sqlite3.connect("banco.db")
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
 
-        cursor.execute("DELETE FROM itens WHERE idDonoItem = ? AND idItem = ?", (self.idDonoItem,self.idItem))
+        cursor.execute("DELETE FROM itens WHERE idDonoItem = %s AND idItem = %s", (self.idDonoItem,self.idItem))
 
         conexao.commit()
         conexao.close()
     
     def quantidadeItem(self, opecacao):
-        conexao = sqlite3.connect("banco.db")
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
 
-        cursor.execute("SELECT quantidade FROM itens WHERE idDonoItem = ? AND idItem = ?",(self.idDonoItem,self.idItem))
+        cursor.execute("SELECT quantidade FROM itens WHERE idDonoItem = %s AND idItem = %s",(self.idDonoItem,self.idItem))
         item = cursor.fetchone()
         conexao.close()
 
@@ -108,11 +111,11 @@ class Item(ABC):
 
         if opecacao == "+":
         
-                conexao = sqlite3.connect("banco.db")
+                conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
                 cursor = conexao.cursor()
 
                 quantidadeNova = quantidade + 1
-                cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
+                cursor.execute("UPDATE itens SET quantidade = %s WHERE idDonoItem = %s AND idItem = %s",
                                 (quantidadeNova,self.idDonoItem, self.idItem))
                 conexao.commit()
                 conexao.close()
@@ -125,11 +128,11 @@ class Item(ABC):
 
                 elif quantidade > 1:
 
-                    conexao = sqlite3.connect("banco.db")
+                    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
                     cursor = conexao.cursor()
 
                     quantidadeNova = quantidade - 1
-                    cursor.execute("UPDATE itens SET quantidade = ? WHERE idDonoItem = ? AND idItem = ?",
+                    cursor.execute("UPDATE itens SET quantidade = %s WHERE idDonoItem = %s AND idItem = %s",
                                     (quantidadeNova,self.idDonoItem, self.idItem))
                     conexao.commit()
                     conexao.close()
@@ -151,12 +154,17 @@ class ItemPromocional(Item):
         self.desconto = desconto
 
     def calcularPreco(self):
-    
-        if self.desconto >= 0:
+        print(self.desconto, self.quantidade, self.precoUnitario) 
+
+        if self.desconto > 0:
 
             precoComDesconto = self.precoUnitario - self.desconto
             return self.quantidade * precoComDesconto
         
+        elif self.desconto == 0:
+            return self.quantidade * self.precoUnitario
+
+
         else:
             valor = abs(self.desconto)
 
@@ -166,6 +174,5 @@ class ItemPromocional(Item):
             qtd_promo = self.quantidade  // x
             resto = self.quantidade - (x * qtd_promo)
 
-            valorFinal = (resto * self.precoUnitario) + (qtd_promo * y)
-
+            valorFinal = (resto * self.precoUnitario) + (qtd_promo * y * self.precoUnitario)
             return valorFinal

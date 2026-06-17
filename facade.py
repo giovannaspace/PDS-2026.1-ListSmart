@@ -67,7 +67,8 @@ class Facade():
         
         if temDesconto == 1:
             # porcentagem
-            if tipo == 1:
+            #if tipo == 1:
+            if tipo == "porcentagem":
                 desconto_calculo = tipoDesconto(preco,1,0,0,porcentagem)
                  # debug print(desconto_calculo)
                 director = builderDirector(builder, nome, qtd, unidade, preco, obs, categoria, idLista, desconto_calculo, 0)
