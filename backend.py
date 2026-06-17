@@ -23,22 +23,13 @@ print(pyfiglet.figlet_format("ListSmart",font = "big",justify ="center"))
 #from builder import *
 from classes_dados import *
 
-db_pool = pool.SimpleConnectionPool(
-    minconn=5,
-    maxconn=10,
-    keepalives=1,
-    keepalives_idle=30, 
-    keepalives_interval=10, 
-    keepalives_count=5,
 
-    dsn=os.environ.get("DATABASE_URL")
-)
 ######################## Parte do Banco de Dados ######################################
 def bancoDados():
     
     #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     #conexao.execute("PRAGMA foreign_keys = ON")
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cursor = conexao.cursor()
     
     cursor.execute("""CREATE TABLE IF NOT EXISTS usuarios(
@@ -79,12 +70,12 @@ def bancoDados():
     conexao.commit()
 
     #conexao.close()
-    db_pool.putconn(conexao)
+    conexao.close()
 
 #salvar novo usuario no banco de dados
 def usuarioNovoBD(usuario): 
 
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
     #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     #conexao.execute("PRAGMA foreign_keys = ON")
@@ -95,12 +86,12 @@ def usuarioNovoBD(usuario):
                    usuario.email, usuario.senha))
     conexao.commit()
    # conexao.close()
-    db_pool.putconn(conexao)
+    conexao.close()
 
 #salvar lista no banco de dados
 def ListaNovaBD(listas): 
     
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
     #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     #conexao.execute("PRAGMA foreign_keys = ON")
@@ -111,13 +102,13 @@ def ListaNovaBD(listas):
                     listas.tetoOrcamentario, listas.observacoes, listas.dataLista, listas.idDono))
     conexao.commit()
    # conexao.close()
-    db_pool.putconn(conexao)
+    conexao.close()
 
 
 #salvar item no banco de dados 
 def ItemNovaBD(itens): 
 
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
     #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     #conexao.execute("PRAGMA foreign_keys = ON")  
@@ -129,7 +120,7 @@ def ItemNovaBD(itens):
     conexao.commit()
    # conexao.close()
 
-    db_pool.putconn(conexao)
+    conexao.close()
 #DEBUG
     #print(itens.nomeItem, itens.quantidade, itens.unidade,itens.precoUnitario,itens.desconto,itens.statusCompra,itens.idDonoItem,itens.observacoesItem,itens.categorias)
 
@@ -146,7 +137,7 @@ class Usuario():
     def login(email,senha):
         
         
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
@@ -155,7 +146,7 @@ class Usuario():
         resultado = cursor.fetchone()
         #conexao.close()
         
-        db_pool.putconn(conexao)
+        conexao.close()
         
         if resultado:
             #Criando um crachá
@@ -168,7 +159,7 @@ class Usuario():
 
 def cadastro(nome,email,senha):
         
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cursor = conexao.cursor()
@@ -176,7 +167,7 @@ def cadastro(nome,email,senha):
         cursor.execute("SELECT email FROM usuarios WHERE email = %s", (email,))
         resultado = cursor.fetchone()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
         
         if email != "" and senha != "":
                 
@@ -193,7 +184,7 @@ def cadastro(nome,email,senha):
 
 def contarItens(idLista):
 
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
     #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     cursor = conexao.cursor()
@@ -202,7 +193,7 @@ def contarItens(idLista):
     qtd = cursor.fetchone()[0]
 
     #conexao.close()
-    db_pool.putconn(conexao)
+    conexao.close()
 
     if qtd:
         return qtd
@@ -212,7 +203,7 @@ def contarItens(idLista):
 
 def buscarLista(idDono):
     
-    conexao = db_pool.getconn()
+    conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
     # conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
     #conexao.execute("PRAGMA foreign_keys = ON")
@@ -221,7 +212,7 @@ def buscarLista(idDono):
     cursor.execute("SELECT idLista, nomeLista, dataLista FROM listas WHERE idDono = %s", (idDono,))
     listasDoDono = cursor.fetchall()
     #conexao.close()
-    db_pool.putconn(conexao)
+    conexao.close()
     
     listas = []
     for linha in listasDoDono:
@@ -275,7 +266,7 @@ class Lista():
     
     def itensDaLista(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -284,7 +275,7 @@ class Lista():
         cursor.execute("SELECT * FROM itens WHERE idDonoItem = %s", (self.idLista,))
         linha = cursor.fetchall()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
         listaObetos = []
 
@@ -302,7 +293,7 @@ class Lista():
   
     def alterarStatus(self, idItem):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -318,11 +309,11 @@ class Lista():
                        """, (idItem,self.idLista))
         conexao.commit()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
  
     def removerLista(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -334,12 +325,12 @@ class Lista():
 
         conexao.commit()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
     
     def atualizacaoLista(self,campo,valorNovo):
         
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -364,16 +355,16 @@ class Lista():
         
         else:
             #conexao.close()
-            db_pool.putconn(conexao)
+            conexao.close()
             return
         
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
     
     @staticmethod
     def recontruirLista(idLista):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
        # conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -382,7 +373,7 @@ class Lista():
         cursor.execute("SELECT * FROM listas WHERE idLista = %s", (idLista,))
         linha = cursor.fetchone()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
         
         if linha:
             lista = Lista(
@@ -400,7 +391,7 @@ class Lista():
  
     def calcularTotalGeral(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -409,7 +400,7 @@ class Lista():
         cursor.execute("SELECT * FROM itens WHERE idDonoItem = %s", (self.idLista,))
         linha = cursor.fetchall()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
         valorTotalGeral = 0
 
@@ -423,7 +414,7 @@ class Lista():
     def calcularTotalMarcados(self):
 
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -432,7 +423,7 @@ class Lista():
         cursor.execute("SELECT * FROM itens WHERE idDonoItem = %s AND statusCompra = %s", (self.idLista,1))
         linha = cursor.fetchall()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
         valorTotalMarcados = 0
 
@@ -449,7 +440,7 @@ class Lista():
     def calcularTotalPendentes(self): 
         
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -458,7 +449,7 @@ class Lista():
         cursor.execute("SELECT * FROM itens WHERE idDonoItem = %s AND statusCompra = %s", (self.idLista,0))
         linha = cursor.fetchall()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
         valorTotalPendentes = 0
         if linha:
@@ -491,7 +482,7 @@ class Lista():
 # função que antes estava no app.py
 def atualizar_quant_e_categoria(itemRec,quantidade,categoria):
         
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         cursor = conexao.cursor()
@@ -510,7 +501,7 @@ def atualizar_quant_e_categoria(itemRec,quantidade,categoria):
 
         conexao.commit()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
 
 
@@ -521,7 +512,7 @@ class GerenciamentoCategoria():
 
     def sugestaoNomeLista(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -530,7 +521,7 @@ class GerenciamentoCategoria():
         cursor.execute("SELECT nomeCategoria FROM categorias")
         nomes = cursor.fetchall()
         #conexao.close(
-        db_pool.putconn(conexao)
+        conexao.close()
 
         sugestoes = ["Compras do Mês", "Feira da Semana"]
 
@@ -542,7 +533,7 @@ class GerenciamentoCategoria():
         
     def sugestaoNomeItem(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -552,7 +543,7 @@ class GerenciamentoCategoria():
         cursor.execute("SELECT DISTINCT nomeItemCategoria FROM dicionario")
         nomes = cursor.fetchall()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
         sugestoes = []
 
@@ -564,7 +555,7 @@ class GerenciamentoCategoria():
        
     def categoria(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
 
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
@@ -582,11 +573,11 @@ class GerenciamentoCategoria():
 
         conexao.commit()
         #conexao.close()
-        db_pool.putconn(conexao)
+        conexao.close()
 
     def registrarCategoria(self,novaCategoria):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
@@ -596,11 +587,11 @@ class GerenciamentoCategoria():
 
         conexao.commit()
         #conexao.close() 
-        db_pool.putconn(conexao)
+        conexao.close()
 
     def dicionario(self):
 
-        conexao = db_pool.getconn()
+        conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao = psycopg2.connect(os.environ.get("DATABASE_URL"))
         #conexao.execute("PRAGMA foreign_keys = ON")
         cursor = conexao.cursor()
@@ -624,7 +615,7 @@ class GerenciamentoCategoria():
 
         conexao.commit()
         #conexao.close() 
-        db_pool.putconn(conexao) 
+        conexao.close() 
 
 class compartilhamento(): 
     def __init__(self,listaRec):
